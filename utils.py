@@ -6,6 +6,9 @@ from typing import Literal, Union
 import numpy as np
 import pandas as pd
 
+def test_yair:
+    pass
+
 
 def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Literal['all']]):
     """
