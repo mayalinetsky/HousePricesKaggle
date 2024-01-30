@@ -35,5 +35,21 @@ def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Lite
 def _load_train_data():
     return pd.read_csv(r'train.csv')
 
+
 def _load_test_data():
     return pd.read_csv(r'test.csv')
+
+
+def calc_num_missing_vals_per_col(data: pd.DataFrame):
+    """
+    Return a pd.Series with index of a column name, and values of the number of missing values for the column.
+    Does not include columns with no missing values.
+    Sorted from smallest to biggest.
+    """
+
+    def count_nans(column):
+        return column.isna().sum()
+
+    num_of_nans = data.apply(count_nans)
+    col_to_num_of_nans_display = num_of_nans[num_of_nans != 0].sort_values(ascending=False)
+    return col_to_num_of_nans_display
