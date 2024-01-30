@@ -4,7 +4,10 @@ Utilities module containing helper functions for the project
 
 from typing import Literal, Union
 import numpy as np
+import seaborn as sns
 import pandas as pd
+from matplotlib import pyplot as plt
+from sklearn.model_selection import ValidationCurveDisplay
 
 
 def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Literal['all']]):
@@ -53,3 +56,23 @@ def calc_num_missing_vals_per_col(data: pd.DataFrame):
     num_of_nans = data.apply(count_nans)
     col_to_num_of_nans_display = num_of_nans[num_of_nans != 0].sort_values(ascending=False)
     return col_to_num_of_nans_display
+
+
+def plot_price_dist_per_year(df: pd.DataFrame):
+    """
+    Plot a line chart of the mean price (y-axis) per year (x-axis), with a colored area plot indicating the variance
+     of prices in the year.
+    """
+    price_sorted_by_year = df[['YrSold', 'SalePrice']].copy().sort_values('YrSold')
+    prices_per_year = price_sorted_by_year.groupby('YrSold').apply(list)
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    # ax.plot(mean_price_per_year.index, mean_price_per_year['SalePrice'])
+
+    sns.lineplot(data=price_sorted_by_year, x="YrSold", y="SalePrice", errorbar=('ci', 75))
+    sns.despine()
+
+    fig.suptitle("Distribution of House Prices Over the Years")
+    ax.set_title("Mean Price and 75% Confidence Interval")
+    plt.show()
+
