@@ -96,3 +96,58 @@ def plot_mean_price_and_stddev_per_category(df: pd.DataFrame):
         cur_ax.set_title(column)
     plt.tight_layout()
     plt.show()
+
+
+def plot_number_of_sales_and_prices_across_time(df: pd.DataFrame):
+    """
+    TODO split function into smaller ones
+    """
+    # Looking for seasonality in number of sales
+    sales_grouped = df.groupby(['YrSold', 'MoSold']).size()
+    sales_grouped_reset = sales_grouped.reset_index(name='Count')
+    sales_grouped_reset['Year-Month'] = sales_grouped_reset['YrSold'].astype(str) + '-' + sales_grouped_reset[
+        'MoSold'].astype(str)
+    plt.figure(figsize=(12, 3))
+    plt.plot(sales_grouped_reset['Year-Month'], sales_grouped_reset['Count'])
+    plt.xticks(rotation=45)
+    plt.title('Sales Seasonality')
+    plt.xlabel('Year-Month')
+    plt.ylabel('Number of Sales')
+    plt.grid(True)
+
+    # looking for seasonality in sale prices
+    price_grouped = df.groupby(['YrSold', 'MoSold'])['SalePrice'].mean()
+    price_grouped_reset = price_grouped.reset_index(name='AvgPrice')
+    price_grouped_reset['Year-Month'] = price_grouped_reset['YrSold'].astype(str) + '-' + price_grouped_reset[
+        'MoSold'].astype(str)
+    plt.figure(figsize=(12, 3))
+    plt.plot(price_grouped_reset['Year-Month'], price_grouped_reset['AvgPrice'])
+    plt.xticks(rotation=45)
+    plt.title('Price Seasonality')
+    plt.xlabel('Year-Month')
+    plt.ylabel('Average Sale Price')
+    plt.xlim('2006-1', '2010-6')
+    plt.ylim(150000)
+    plt.grid(True)
+
+    # Looking for correlation in both seasonality patterns
+    fig, ax1 = plt.subplots(figsize=(12, 3))
+
+    ax1.plot(sales_grouped_reset['Year-Month'], sales_grouped_reset['Count'], label='Sales Count', color='blue')
+    ax1.set_xlabel('Year-Month')
+    ax1.set_ylabel('Number of Sales', color='blue')
+    ax1.tick_params(axis='y', labelcolor='blue')
+    plt.xticks(rotation=45)
+
+    ax2 = ax1.twinx()
+    ax2.plot(price_grouped_reset['Year-Month'], price_grouped_reset['AvgPrice'], label='Average Price', color='red')
+    ax2.set_ylabel('Average Price', color='red')
+    ax2.tick_params(axis='y', labelcolor='red')
+
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines + lines2, labels + labels2, loc='upper left')
+    ax2.set_ylim(150000)
+    plt.title('Sales and Average Price Seasonality')
+    plt.grid(True)
+    plt.show()

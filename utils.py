@@ -85,3 +85,4 @@ def calc_categorical_feature_correlation_to_target(df: pd.DataFrame):
     sorted_correlation = categorical_correlation.sort_values(ascending=False)
 
     return sorted_correlation
+
