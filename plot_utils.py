@@ -2,6 +2,8 @@
 Functions that plot graphs for different occasions.
 Split from notebook for readability.
 """
+import warnings
+
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -13,6 +15,7 @@ def plot_price_dist_per_year(df: pd.DataFrame):
     Plot a line chart of the mean price (y-axis) per year (x-axis), with a colored area plot indicating the variance
      of prices in the year.
     """
+    warnings.filterwarnings("ignore", "use_inf_as_na")
     price_sorted_by_year = df[['YrSold', 'SalePrice']].copy().sort_values('YrSold')
     prices_per_year = price_sorted_by_year.groupby('YrSold').apply(list)
 
@@ -78,4 +81,18 @@ def plot_head_and_tail_categorical_corr_to_target(sorted_correlation: pd.Series)
     sorted_correlation.tail(10).plot(kind='barh')
     plt.title('Top Negative Correlation to Sale Price of Categorical Features (OneHotEncoding)');
     plt.xlabel("Correlation to Sale Price");
+    plt.show()
+
+
+def plot_mean_price_and_stddev_per_category(df: pd.DataFrame):
+    fig, axes = plt.subplots(11, 4, figsize=(12, 35))
+    for i, column in enumerate(df.select_dtypes(include=['object']).columns):
+        target_mean = df.groupby(column)['SalePrice'].mean()
+
+        target_std = df.groupby(column)['SalePrice'].std()
+
+        cur_ax = axes[i // 4, i % 4]
+        target_mean.plot(kind='bar', ax=cur_ax, yerr=target_std, capsize=5)
+        cur_ax.set_title(column)
+    plt.tight_layout()
     plt.show()
