@@ -4,10 +4,7 @@ Utilities module containing helper functions for the project
 
 from typing import Literal, Union
 import numpy as np
-import seaborn as sns
 import pandas as pd
-from matplotlib import pyplot as plt
-from sklearn.model_selection import ValidationCurveDisplay
 
 
 def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Literal['all']]):
@@ -58,40 +55,33 @@ def calc_num_missing_vals_per_col(data: pd.DataFrame):
     return col_to_num_of_nans_display
 
 
-def plot_price_dist_per_year(df: pd.DataFrame):
-    """
-    Plot a line chart of the mean price (y-axis) per year (x-axis), with a colored area plot indicating the variance
-     of prices in the year.
-    """
-    price_sorted_by_year = df[['YrSold', 'SalePrice']].copy().sort_values('YrSold')
-    prices_per_year = price_sorted_by_year.groupby('YrSold').apply(list)
-
-    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-    # ax.plot(mean_price_per_year.index, mean_price_per_year['SalePrice'])
-
-    sns.lineplot(data=price_sorted_by_year, x="YrSold", y="SalePrice", errorbar=('ci', 75))
-    sns.despine()
-
-    fig.suptitle("Distribution of House Prices Over the Years")
-    ax.set_title("Mean Price and 75% Confidence Interval")
-    plt.show()
-
-
 def calc_numeric_feature_correlation(features_df: pd.DataFrame) -> list[tuple[str, str, float]]:
     """
-    Calculate the correlation between all pairs of numeric features in the dataframe.
+    Calculate the pearson correlation between all pairs of numeric features in the dataframe.
     """
-    numeric_columns = features_df.describe(include=[np.number]).T.index
-
-    correlation_matrix = features_df[numeric_columns].corr()
+    correlation_matrix = features_df.corr(numeric_only=True)
     correlations = []
 
-    for i in range(len(numeric_columns)):
-        for j in range(i + 1, len(numeric_columns)):
-            feature1 = numeric_columns[i]
-            feature2 = numeric_columns[j]
+    for i in range(len(correlation_matrix)):
+        for j in range(i + 1, len(correlation_matrix)):
+            feature1 = correlation_matrix.index[i]
+            feature2 = correlation_matrix.columns[j]
             correlation = correlation_matrix.iloc[i, j]
 
             correlations.append((feature1, feature2, round(correlation, 3)))
 
     return correlations
+
+
+def calc_categorical_feature_correlation_to_target(df: pd.DataFrame):
+    """
+    Calculate the pearson correlation between all categorical features in the dataframe to the sale price.
+    This is done using one-hot encoding of the features.
+    """
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    df_encoded = pd.get_dummies(df, columns=categorical_columns)
+    correlation = df_encoded.corr()
+    categorical_correlation = correlation['SalePrice'].drop(df.select_dtypes(include=[np.number]).columns)
+    sorted_correlation = categorical_correlation.sort_values(ascending=False)
+
+    return sorted_correlation
