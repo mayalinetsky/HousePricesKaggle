@@ -76,3 +76,22 @@ def plot_price_dist_per_year(df: pd.DataFrame):
     ax.set_title("Mean Price and 75% Confidence Interval")
     plt.show()
 
+
+def calc_numeric_feature_correlation(features_df: pd.DataFrame) -> list[tuple[str, str, float]]:
+    """
+    Calculate the correlation between all pairs of numeric features in the dataframe.
+    """
+    numeric_columns = features_df.describe(include=[np.number]).T.index
+
+    correlation_matrix = features_df[numeric_columns].corr()
+    correlations = []
+
+    for i in range(len(numeric_columns)):
+        for j in range(i + 1, len(numeric_columns)):
+            feature1 = numeric_columns[i]
+            feature2 = numeric_columns[j]
+            correlation = correlation_matrix.iloc[i, j]
+
+            correlations.append((feature1, feature2, round(correlation, 3)))
+
+    return correlations
