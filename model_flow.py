@@ -9,7 +9,7 @@ Module containing functions that represent the model flow:
 - dataset prep
 - fit
 - evaluate
-- prediction to submission
+- prediction to submission file
 """
 
 import time
@@ -18,7 +18,9 @@ import pandas as pd
 
 
 def prepare_submission_csv(ids: np.ndarray, sale_price_prediction: np.ndarray):
-    submission_df = pd.DataFrame(data={"Id": ids, "SalePrice": sale_price_prediction})
+    int_ids = ids.astype(int)
+    submission_df = pd.DataFrame(data={"Id": int_ids, "SalePrice": sale_price_prediction})
 
     datetime_str = time.strftime('%H-%M-%S')
-    submission_df.to_csv(f"predictions_{datetime_str}.csv")
+    submission_df.to_csv(f"predictions_{datetime_str}.csv",
+                         index=False)
