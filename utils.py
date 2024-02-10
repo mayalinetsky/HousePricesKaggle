@@ -33,11 +33,11 @@ def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Lite
 
 
 def _load_train_data():
-    return pd.read_csv(r'train.csv')
+    return pd.read_csv(r'train.csv', index_col='Id')
 
 
 def _load_test_data():
-    return pd.read_csv(r'test.csv')
+    return pd.read_csv(r'test.csv', index_col='Id')
 
 
 def calc_num_missing_vals_per_col(data: pd.DataFrame):
