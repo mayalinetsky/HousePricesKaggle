@@ -3,6 +3,11 @@ All parameters to use in model flow (preprocessing, model type, model param etc)
 
 
 Note: "V0" refers to baseline
+
+Note for teammates: When adding a pack to one of the 'manipulation packs' -
+feature_extraction_packs/feature_target_separation_packs/preprocessing_packs/labeling_packs
+make sure you add the key to all other manipulation packs.
+Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1' to all other manipulation packs.
 """
 import pandas as pd
 from sklearn.impute import SimpleImputer
