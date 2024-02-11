@@ -1,6 +1,6 @@
 """
-Module executing the project flow.
-See the model_flow.png for a diagram.
+Helper functions for main flow.
+See the main_flow.png for a diagram.
 """
 
 import time

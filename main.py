@@ -1,5 +1,6 @@
 """
-Run all permutations listed in config
+Run all permutations listed in config.
+See the main_flow.png for a diagram.
 
 Note: temporarily, runs only the baseline model
 """
