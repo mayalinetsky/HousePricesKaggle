@@ -9,7 +9,7 @@ import pandas as pd
 
 def load_house_prices_data(source: Union[Literal['train'], Literal['test'], Literal['all']]):
     """
-    Load train and\or test data.
+    Load train and\\or test data.
     For information on columns, refer to data_description.txt
 
     Train data includes 'SalePrice'.
@@ -85,4 +85,3 @@ def calc_categorical_feature_correlation_to_target(df: pd.DataFrame):
     sorted_correlation = categorical_correlation.sort_values(ascending=False)
 
     return sorted_correlation
-

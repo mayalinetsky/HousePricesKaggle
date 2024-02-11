@@ -1,0 +1,39 @@
+- MSZoning: 93% are RL or RM
+- Street: 99% is Pave
+- LotShape: 96% are Reg or IR1
+- LandContour: 90% are Lvl
+- Utilities: 99.9% are AllPub
+- LotConfig: 90% are Inside or Corner
+- LandSlope: 95% are Gtl
+- BldgType: 91% are 1Fam or TwnhsE
+- RoofStyle: 97% are Gable or Hip
+- RoofMatl: 98% are CompShg
+- MasVnrType: 90% are None or BrkFace
+- ExterQual: 95% are TA or Gd
+- ExterCond: 98% are TA or Gd
+- BsmtCond: 92% are TA
+- BsmtFinType2: 88% are Unf
+- Heating: 97% are Gasa
+- CentralAir: 93% are Y
+- Electrical: 91% are SBrkr
+- Functional: 93% are Typ
+- GarageType: 91% are Attchd or Detchd
+- GarageQual: 95% are TA
+- GarageCond: 96% are TA
+- PavedDrive: 92% are Y
+- SaleType: 95% of values are WD or New
+- SaleCondition: 98% are Normal, Partial or Abnormal
+- MaxVnrArea: 60% are 0
+- BsmtFinSF1: 32% are 0
+- BsmtFinSF2: 86% are 0
+- 2ndFlrSF: 57% are 0
+- LowQualFinSF: 98% are 0
+- BsmtHalfBath: 94% are 0
+- KitchenAbvGr: 95% are 1
+- WoodDeckSF: 52% are 0
+- OpenPorchSF: 45% are 0
+- EnclosedPorch: 86% are 0
+- 3SsnPorch: 98% are 0
+- ScreenPorch: 92% are 0
+- PoolArea: 99% are 0
+- MiscVal: 96% are 0
