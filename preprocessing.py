@@ -1,13 +1,21 @@
 """
-Module to prepare the dataframe to model fitting
+Simple functions for preprocessors
 """
 import pandas as pd
+
+
+def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.copy()
+
+    _fill_na_GarageYrBlt_w_YearBuilt(data)
+
+    return data.select_dtypes(include='number')
 
 
 def preprocess(data: pd.DataFrame):
     """
     Prepare the data before model fitting:
-    1. Converting some nan values to str
+    1. Converting some nan values to str 'No'
     2. Convert 'PoolArea' and 'PoolQC' to one binary feature 'HavePool'
     """
     data = data.copy()
@@ -16,11 +24,10 @@ def preprocess(data: pd.DataFrame):
 
     _convert_pool_features_to_binary(data)
 
-    _fill_na_lot_frontage(data)
     return data
 
 
-def _convert_nan_to_str(data: pd.DataFrame):
+def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     """
     preprocess features with NaN values that reflect 'None' and should not be discarded (should be counted)
     """
@@ -30,24 +37,20 @@ def _convert_nan_to_str(data: pd.DataFrame):
 
     for feature in relevant_columns:
         try:
-            data[feature].fillna(value='No', inplace=True)
+            return data[feature].fillna(value='No', inplace=inplace)
         except KeyError:
             pass
 
 
-def _convert_pool_features_to_binary(data: pd.DataFrame):
+def _convert_pool_features_to_binary(data: pd.DataFrame, inplace: bool = True):
     """
     only 7 samples with pool, but might be important, so:
     we create new *binary* feature 'HavePool' and drop 'PoolQC' 'PoolArea'
     """
     data.loc[data['PoolArea'] != 0, 'HavePool'] = 1
     data.loc[data['PoolArea'] == 0, 'HavePool'] = 0
-    data.drop(['PoolArea', 'PoolQC'], axis=1, inplace=True)
+    return data.drop(['PoolArea', 'PoolQC'], axis=1, inplace=inplace)
 
 
-def _fill_na_lot_frontage(data: pd.DataFrame):
-    """
-
-    """
-    mean_value_LotFrontage = data['LotFrontage'].mean()
-    data['LotFrontage'].fillna(value=mean_value_LotFrontage, inplace=True)
+def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):
+    return data['GarageYrBlt'].fillna(data['YearBuilt'], inplace=inplace)
