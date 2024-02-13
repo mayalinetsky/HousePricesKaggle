@@ -2,6 +2,7 @@
 Simple functions for preprocessors
 """
 import pandas as pd
+from constants import *
 
 
 def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
@@ -15,7 +16,7 @@ def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
 def preprocess(data: pd.DataFrame):
     """
     Prepare the data before model fitting:
-    1. Converting some nan values to str 'No'
+    1. Converting some nan values to str 'None'
     2. Convert 'PoolArea' and 'PoolQC' to one binary feature 'HavePool'
     """
     data = data.copy()
@@ -31,15 +32,18 @@ def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     """
     preprocess features with NaN values that reflect 'None' and should not be discarded (should be counted)
     """
-    relevant_columns = ['BsmtQual', 'BsmtCond', 'FireplaceQu', 'GarageType',
-                        'GarageFinish', 'GarageQual', 'GarageCond', 'BsmtExposure', 'BsmtFinType1', 'PoolQC',
-                        'MiscFeature']
+    relevant_columns = [BsmtQual, BsmtCond, FireplaceQu, GarageType,
+                        GarageFinish, GarageQual, GarageCond, BsmtExposure, BsmtFinType1, PoolQC,
+                        MiscFeature]
 
     for feature in relevant_columns:
         try:
-            return data[feature].fillna(value='No', inplace=inplace)
+            tmp = data[feature].fillna(value='None', inplace=inplace)
+            if not inplace:
+                data[feature] = tmp
         except KeyError:
             pass
+    return data
 
 
 def _convert_pool_features_to_binary(data: pd.DataFrame, inplace: bool = True):
