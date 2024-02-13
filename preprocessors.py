@@ -9,6 +9,10 @@ Example:
 """
 
 from typing import *
+
+import numpy as np
+from sklearn.preprocessing import OrdinalEncoder
+from constants import *
 from preprocessing import *
 import pandas as pd
 from sklearn.base import TransformerMixin
@@ -23,6 +27,7 @@ class NoFitPreProcessor(TransformerMixin):
         - Delete certain columns
         - Fill all nans with 0
     """
+
     def __init__(self, no_fit_functions: List[Callable[[pd.DataFrame], pd.DataFrame]], *args, **kwargs):
         """
 
@@ -42,3 +47,6 @@ class NoFitPreProcessor(TransformerMixin):
 
     def transform(self, X: pd.DataFrame):
         return self._apply_functions(X)
+
+    def set_output(self, *, transform=None):
+        pass

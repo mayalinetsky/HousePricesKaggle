@@ -12,10 +12,13 @@ Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+from sklearn.compose import ColumnTransformer
+from constants import *
 from feature_extraction import FeatureExtractor
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
-from preprocessing import baseline_preprocess
+from preprocessing import baseline_preprocess, drop_columns
 from preprocessors import NoFitPreProcessor, preprocess
 from raw_data import get_raw_data
 from raw_data_folding import BaseTrainValTestSplitter
@@ -39,10 +42,50 @@ feature_target_separation_packs = {
     "V0": {"function": separate_features_and_target}
 }
 
+COMMON_CATEGORICAL_FEATURES1 = [ExterQual, ExterCond, HeatingQC, KitchenQual]
+COMMON_CATEGORICAL_ORDINAL_ENCODER1 = OrdinalEncoder(
+    categories=[['Po', 'Fa', 'TA', 'Gd', 'Ex']] * len(COMMON_CATEGORICAL_FEATURES1),
+    handle_unknown='use_encoded_value',
+    unknown_value=-1)
+
+COMMON_CATEGORICAL_FEATURES2 = [BsmtQual, BsmtCond, FireplaceQu, GarageQual, GarageCond]
+COMMON_CATEGORICAL_ORDINAL_ENCODER2 = OrdinalEncoder(
+    categories=[['None', 'Po', 'Fa', 'TA', 'Gd', 'Ex']] * len(COMMON_CATEGORICAL_FEATURES2),
+    handle_unknown='use_encoded_value',
+    unknown_value=-1)
+
+UNCOMMON_CATEGORICAL_FEATURES = [LotShape, Utilities, LandSlope, BsmtExposure, Functional,
+                                 GarageFinish]
+UNCOMMON_CATEGORICAL_ORDINAL_ENCODER = OrdinalEncoder(categories=[['IR3', 'IR2', 'IR1', 'Reg'],  # LotShape
+                                                                  ['ELO', 'NoSeWa', 'NoSewr', 'AllPub'],  # Utilities
+                                                                  ['Sev', 'Mod', 'Gtl'],  # LandSlope
+                                                                  ['None', 'No', 'Mn', 'Av', 'Gd'],  # BsmtExposure
+                                                                  ['Sal', 'Sev', 'Maj2', 'Maj1', 'Mod', 'Min2',
+                                                                   'Min1',
+                                                                   'Typ'],  # Functional
+                                                                  ['None', 'No', 'Unf', 'RFn', 'Fin']
+                                                                  # GarageFinish # 'None' was NA before handling
+                                                                  # missing values
+                                                                  ],
+                                                      handle_unknown='use_encoded_value',
+                                                      unknown_value=-1)
 # from name to arguments for a pipeline
 preprocessing_packs = {
     "V0": {"steps": [NoFitPreProcessor([baseline_preprocess]),
-                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')]}
+                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')]},
+    "V1": {"steps": [NoFitPreProcessor([preprocess]),
+                     ColumnTransformer(transformers=[
+                         ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
+                         ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
+                         ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES)
+                     ]
+                     ),
+                     NoFitPreProcessor([drop_columns]),
+                     OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')
+                     ],
+           }
+
 }
 
 labeling_packs = {

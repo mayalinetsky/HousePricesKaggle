@@ -1,8 +1,11 @@
 """
 Simple functions for preprocessors
 """
+import logging
+
 import pandas as pd
 from constants import *
+from utils import calc_numeric_feature_correlation
 
 
 def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
@@ -25,6 +28,17 @@ def preprocess(data: pd.DataFrame):
 
     _convert_pool_features_to_binary(data)
 
+    return data
+
+
+def drop_columns(data: pd.DataFrame):
+    data = data.copy()
+
+    data = _drop_highly_correlated_numeric_features(data)
+
+    data = _drop_low_correlation_categorical_features(data)
+
+    data = _drop_imbalanced_features(data)
     return data
 
 
@@ -53,8 +67,41 @@ def _convert_pool_features_to_binary(data: pd.DataFrame, inplace: bool = True):
     """
     data.loc[data['PoolArea'] != 0, 'HavePool'] = 1
     data.loc[data['PoolArea'] == 0, 'HavePool'] = 0
-    return data.drop(['PoolArea', 'PoolQC'], axis=1, inplace=inplace)
+    return data.drop(['PoolArea', 'PoolQC'], axis=1, errors='ignore', inplace=inplace)
 
 
 def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):
     return data['GarageYrBlt'].fillna(data['YearBuilt'], inplace=inplace)
+
+
+def _drop_highly_correlated_numeric_features(data: pd.DataFrame, threshold: float = 0.7):
+    """
+    Calculates the correlation between all pairs of numeric features in the dataframe, looks at all the pairs
+    with correlation above the threshold, and drops the second feature in these pairs.
+    """
+    numeric_correlations = calc_numeric_feature_correlation(data)
+
+    highly_correlated_numeric_features = [t for t in numeric_correlations if t[2] >= threshold]
+
+    high_correlated_features_to_drop = [t[1] for t in highly_correlated_numeric_features]
+
+    logging.debug(f"Dropping the following highly correlated numeric features: {high_correlated_features_to_drop}")
+
+    return data.drop(columns=high_correlated_features_to_drop, errors='ignore')
+
+
+def _drop_low_correlation_categorical_features(data: pd.DataFrame):
+    """
+    Drop features that show low correlation to target (by indirect/manual impression)
+    """
+    cat_cols_uncor_w_target = [LotShape, LandContour, LotConfig,
+                               LandSlope, Condition2, RoofMatl, BsmtExposure,
+                               BsmtFinType1, BsmtFinType2, Electrical,
+                               Functional, Fence, MiscFeature
+                               ]
+    return data.drop(columns=cat_cols_uncor_w_target, errors='ignore')
+
+
+def _drop_imbalanced_features(data: pd.DataFrame):
+    imbalanced = [Heating, Alley, Street, Utilities]
+    return data.drop(columns=imbalanced, errors='ignore')

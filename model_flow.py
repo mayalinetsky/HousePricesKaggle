@@ -46,7 +46,7 @@ def process_fold(raw_fold: RawFold,
         unprocessed_x_ys.append((X, y))
 
     # preprocess and label
-    preprocess_pipe = make_pipeline(*preprocessing_pack['steps'])
+    preprocess_pipe = make_pipeline(*preprocessing_pack['steps']).set_output(transform="pandas")
     preprocess_pipe.fit(unprocessed_x_ys[0][0])
 
     processed_x_ys: list[X_y] = []

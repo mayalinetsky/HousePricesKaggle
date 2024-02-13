@@ -9,6 +9,8 @@ import seaborn as sns
 import pandas as pd
 from matplotlib import pyplot as plt
 
+from preprocessing import _convert_nan_to_str
+
 
 def plot_price_dist_per_year(df: pd.DataFrame):
     """
@@ -59,6 +61,7 @@ def plot_column_histograms(df: pd.DataFrame):
     """
     Plot a histogram for each column in the dataframe.
     """
+    df = _convert_nan_to_str(df, inplace=False)
     fig, axes = plt.subplots(ncols=9, nrows=9, figsize=(20, 16))
     for col_index, col in enumerate(df.columns):
         ax_col_index = col_index % 9
