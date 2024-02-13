@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+
+from flow_config import get_raw_data_packs
 # Imports
 from utils import load_house_prices_data
 from utils import calc_num_missing_vals_per_col, np
@@ -13,3 +15,7 @@ from utils import calc_numeric_feature_correlation
 from plot_utils import plot_mean_price_and_stddev_per_category
 from preprocessing import preprocess
 from plot_utils import plot_number_of_sales_and_prices_across_time
+
+if __name__ == "__main__":
+    train_raw_data, test_raw_data = get_raw_data_packs['V0']['function']()
+    print(train_raw_data)
