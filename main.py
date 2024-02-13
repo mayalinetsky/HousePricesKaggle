@@ -38,7 +38,7 @@ if __name__ == "__main__":
     for fold_index, raw_fold in enumerate(raw_folds, start=1):
         logging.info(f"\tFold {fold_index}/{len(raw_folds)}")
         processed_fold = process_fold(raw_fold,
-                                      feature_extraction_pack=feature_extraction_packs["V0"],
+                                      feature_extraction_pack=feature_extraction_packs["V1"],
                                       feature_target_separation_pack=feature_target_separation_packs["V0"],
                                       preprocessing_pack=preprocessing_packs["V1"],
                                       labeling_pack=labeling_packs["V0"])
