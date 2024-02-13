@@ -9,11 +9,6 @@ Example:
 """
 
 from typing import *
-
-import numpy as np
-from sklearn.preprocessing import OrdinalEncoder
-from constants import *
-from preprocessing import *
 import pandas as pd
 from sklearn.base import TransformerMixin
 

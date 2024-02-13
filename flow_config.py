@@ -18,8 +18,8 @@ from constants import *
 from feature_extraction import FeatureExtractor
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
-from preprocessing import baseline_preprocess, drop_columns
-from preprocessors import NoFitPreProcessor, preprocess
+from preprocessing import baseline_preprocess, drop_columns, preprocess
+from preprocessors import NoFitPreProcessor
 from raw_data import get_raw_data
 from raw_data_folding import BaseTrainValTestSplitter
 

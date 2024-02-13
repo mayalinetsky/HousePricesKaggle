@@ -36,9 +36,11 @@ def drop_columns(data: pd.DataFrame):
 
     data = _drop_highly_correlated_numeric_features(data)
 
-    data = _drop_low_correlation_categorical_features(data)
+    data = _drop_categorical_features_w_low_correlation_to_target(data)
 
     data = _drop_imbalanced_features(data)
+
+    data = _drop_correlated_features(data)
     return data
 
 
@@ -90,7 +92,7 @@ def _drop_highly_correlated_numeric_features(data: pd.DataFrame, threshold: floa
     return data.drop(columns=high_correlated_features_to_drop, errors='ignore')
 
 
-def _drop_low_correlation_categorical_features(data: pd.DataFrame):
+def _drop_categorical_features_w_low_correlation_to_target(data: pd.DataFrame):
     """
     Drop features that show low correlation to target (by indirect/manual impression)
     """
@@ -100,6 +102,12 @@ def _drop_low_correlation_categorical_features(data: pd.DataFrame):
                                Functional, Fence, MiscFeature
                                ]
     return data.drop(columns=cat_cols_uncor_w_target, errors='ignore')
+
+
+def _drop_correlated_features(data: pd.DataFrame):
+    # In the data, '1stFlrSF' + '2ndFlrSF' = 'GrLivArea'
+    # We dropped '1stFlrSF' due to high correlation with 'GrLivArea'
+    return data.drop(columns=[FirststFlrSF], errors='ignore')
 
 
 def _drop_imbalanced_features(data: pd.DataFrame):
