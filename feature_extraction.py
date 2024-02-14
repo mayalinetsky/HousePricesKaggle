@@ -144,12 +144,15 @@ class CorrelatedNumericFeaturesDropper(FeatureExtractor):
         super().__init__()
 
     def fit(self, x: pd.DataFrame, y=None):
+        logging.debug(f"Calculating correlation between numeric features in train set...")
 
         numeric_correlations = calc_numeric_feature_correlation(x)
 
         highly_correlated_numeric_features = [t for t in numeric_correlations if t[2] >= self.threshold]
 
         self._columns_to_drop = [t[1] for t in highly_correlated_numeric_features]
+
+        logging.debug(f"Correlation calc done.")
 
         return self
 

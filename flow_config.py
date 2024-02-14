@@ -86,8 +86,8 @@ preprocessing_packs = {
                          remainder='passthrough'
                      ),
                      NoFitPreProcessor([drop_known_columns]),
-                     OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
                      CorrelatedNumericFeaturesDropper(),
+                     OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
                      SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')
                      ],
            }
