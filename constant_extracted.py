@@ -13,3 +13,7 @@ NeibLevel = 'NeibLevel'
 SizeRelativeToMedian = 'SizeRelativeToMedian'
 
 IsInTopQuartile = 'IsInTopQuartile'
+
+Exterior1stGroup = 'Exterior1stGroup'
+
+Exterior2ndGroup = 'Exterior2ndGroup'

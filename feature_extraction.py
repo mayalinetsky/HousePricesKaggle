@@ -71,6 +71,34 @@ def join_liv_bsmt_areas(x: pd.DataFrame):
     return x.drop(columns=columns_to_drop)
 
 
+def group_exterior_covering(x: pd.DataFrame):
+    """
+    Exterior covering ('Exterior1st', 'Exterior2nd') has 2 features with 14 and 15 categories repectively
+     - many of which are sparse.
+    This function maps the 15 categories into 6 new categories.
+    """
+
+    def map_material(material):
+        if material in ['Wd Sdng', 'Wd Shng', 'WdShing', 'AsphShn', 'Plywood']:  # Add or remove as per your dataset
+            return 'Wood'
+        elif material == 'VinylSd':
+            return 'Vinyl'
+        elif material in ['BrkComm', 'BrkFace', 'Brk Cmn']:
+            return 'Brick'
+        elif material in ['MetalSd', 'Stucco', 'CmentBd', 'CemntBd',
+                          'ImStucc']:  # Adjust based on your dataset's values
+            return 'Metal/Stucco/Cement'
+        elif material in ['Stone', 'Other']:
+            return material
+        else:
+            return 'Other'
+
+    x[Exterior1stGroup] = x[Exterior1st].apply(map_material)
+    x[Exterior2ndGroup] = x[Exterior2nd].apply(map_material)
+
+    return x.drop(columns=[Exterior1st, Exterior2nd])
+
+
 class RelativeFeatureExtractor(FeatureExtractor):
     """
     Class for adding new features that are base on the relative position of the old ones.
