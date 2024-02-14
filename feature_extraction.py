@@ -111,6 +111,16 @@ def group_roofstyle_roofmatl(data: pd.DataFrame) -> pd.DataFrame:
     return data.drop(columns=[RoofStyle, RoofMatl])
 
 
+def extract_asset_age(data: pd.DataFrame):
+    """
+    Calculate the asset age. If the asset was remodeled, the age is calculated using the remodel year.
+    TODO this means we will treat a 50 year old appt that has just been remodeled as a new appt?
+    """
+    data[AssetAge] = data[YrSold] - data[[YearBuilt, YearRemodAdd]].max(axis=1)
+
+    return data.drop(columns=[YearBuilt, YearRemodAdd])
+
+
 class RelativeFeatureExtractor(FeatureExtractor):
     """
     Class for adding new features that are base on the relative position of the old ones.

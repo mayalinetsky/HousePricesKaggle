@@ -21,3 +21,5 @@ Exterior2ndGroup = 'Exterior2ndGroup'
 RoofStyleGroup = 'RoofStyleGroup'
 
 RoofMatlGroup = 'RoofMatlGroup'
+
+AssetAge = 'AssetAge'
