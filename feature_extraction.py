@@ -99,6 +99,18 @@ def group_exterior_covering(x: pd.DataFrame):
     return x.drop(columns=[Exterior1st, Exterior2nd])
 
 
+def group_roofstyle_roofmatl(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Joins rare categories to a single one
+    """
+    data[RoofStyleGroup] = data[RoofStyle].apply(
+        lambda x: x if x in ['Gable', 'Hip'] else 'Other')  # Converts into 3 groups
+    data[RoofMatlGroup] = data[RoofMatl].apply(
+        lambda x: 'CompShg' if x == 'CompShg' else 'Other')  # Converts into 2 groups
+
+    return data.drop(columns=[RoofStyle, RoofMatl])
+
+
 class RelativeFeatureExtractor(FeatureExtractor):
     """
     Class for adding new features that are base on the relative position of the old ones.

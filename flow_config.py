@@ -16,7 +16,7 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from constants import *
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
-    CorrelatedNumericFeaturesDropper, group_exterior_covering
+    CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess
@@ -40,7 +40,8 @@ feature_extraction_packs = {
     "V0": {"steps": [FeatureExtractor()]},
     "V1": {"steps": [NoFitPreProcessor([join_porch_areas,
                                         join_liv_bsmt_areas,
-                                        group_exterior_covering]),
+                                        group_exterior_covering,
+                                        group_roofstyle_roofmatl]),
                      RelativeFeatureExtractor()]}
 }
 
