@@ -36,13 +36,17 @@ def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
                         GarageFinish, GarageQual, GarageCond, BsmtExposure, BsmtFinType1, PoolQC,
                         MiscFeature]
 
-    for feature in relevant_columns:
-        try:
-            tmp = data[feature].fillna(value='None', inplace=inplace)
-            if not inplace:
-                data[feature] = tmp
-        except KeyError:
-            pass
+    columns_to_fill = list(set(relevant_columns) & set(data.columns))
+
+    data[columns_to_fill] = data[columns_to_fill].fillna(value = 'None')
+
+    # for feature in relevant_columns:
+    #     try:
+    #         tmp = data[feature].fillna(value='None', inplace=inplace)
+    #         if not inplace:
+    #             data[feature] = tmp
+    #     except KeyError:
+    #         pass
     return data
 
 
