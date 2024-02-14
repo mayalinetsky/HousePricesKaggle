@@ -2,13 +2,16 @@
 Module encapsulating "feature extraction" phase that happens after splitting to folds.
 It gets raw data and transforms it into features ready for preprocessing and labeling.
 """
+import logging
 from typing import *
 
 import numpy as np
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
+
 from constant_extracted import *
 from constants import *
+from utils import calc_numeric_feature_correlation
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin):
@@ -26,6 +29,9 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     def transform(self, x):
         return x
+
+    def set_output(self, *, transform=None):
+        pass
 
 
 def join_porch_areas(x: pd.DataFrame):
@@ -125,3 +131,28 @@ class RelativeFeatureExtractor(FeatureExtractor):
             new_X = pd.merge(new_X, self._neighborhood_price_medians[[Neighborhood, NeibLevel]],
                              on=Neighborhood, how='left').set_index(X.index)
         return new_X
+
+
+class CorrelatedNumericFeaturesDropper(FeatureExtractor):
+    """
+    Calculates the correlation between all pairs of numeric features in the dataframe, looks at all the pairs
+    with correlation above the threshold, and drops the second feature in these pairs.
+    """
+    def __init__(self, threshold: float = 0.7):
+        self.threshold = threshold
+        self._columns_to_drop = []
+        super().__init__()
+
+    def fit(self, x: pd.DataFrame, y=None):
+
+        numeric_correlations = calc_numeric_feature_correlation(x)
+
+        highly_correlated_numeric_features = [t for t in numeric_correlations if t[2] >= self.threshold]
+
+        self._columns_to_drop = [t[1] for t in highly_correlated_numeric_features]
+
+        return self
+
+    def transform(self, x):
+        logging.debug(f"Dropping the following highly correlated numeric features: {self._columns_to_drop}")
+        return x.drop(columns=self._columns_to_drop, errors='ignore')

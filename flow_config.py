@@ -16,9 +16,10 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from constants import *
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
+    CorrelatedNumericFeaturesDropper
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
-from preprocessing import baseline_preprocess, drop_columns, preprocess
+from preprocessing import baseline_preprocess, drop_known_columns, preprocess
 from preprocessors import NoFitPreProcessor
 from raw_data import get_raw_data
 from raw_data_folding import BaseTrainValTestSplitter
@@ -83,8 +84,9 @@ preprocessing_packs = {
                      ],
                          remainder='passthrough'
                      ),
-                     NoFitPreProcessor([drop_columns]),
+                     NoFitPreProcessor([drop_known_columns]),
                      OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                     CorrelatedNumericFeaturesDropper(),
                      SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')
                      ],
            }
