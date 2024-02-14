@@ -15,7 +15,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from constants import *
-from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor
+from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
 from preprocessing import baseline_preprocess, drop_columns, preprocess
@@ -36,7 +36,7 @@ cross_validation_packs = {
 # from name to arguments for a pipeline
 feature_extraction_packs = {
     "V0": {"steps": [FeatureExtractor()]},
-    "V1": {"steps": [NoFitPreProcessor([join_porch_areas]),
+    "V1": {"steps": [NoFitPreProcessor([join_porch_areas, join_liv_bsmt_areas]),
                      RelativeFeatureExtractor()]}
 }
 
