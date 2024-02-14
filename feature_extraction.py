@@ -16,6 +16,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     For example: one-hot encoding
     """
+
     def __init__(self):
         super().__init__()
 
@@ -51,24 +52,57 @@ class RelativeFeatureExtractor(FeatureExtractor):
     Class for adding new features that are base on the relative position of the old ones.
 
     New features:
-    - SizeRelativeToMedian TODO explain
-    - IsInTopQuartile TODO explain
+    - SizeRelativeToMedian - GrLivArea divided by the median GrLivArea of the neighborhood
+    - IsInTopQuartile - 1 if GrLivArea is in the top 15% of the neighborhood
     """
-    def __init__(self):
+
+    def __init__(self, relative_GrLivArea=True, sale_price_by_neighborhood=True):
         super().__init__()
-        self._neighborhood_stats = None
+        self._neighborhood_area_quantiles = None
+        self._neighborhood_price_medians = None
+        self._neigh_price_prct_25 = None
+        self._neigh_price_prct_75 = None
+
+        self._relative_GrLivArea = relative_GrLivArea
+        self._sale_price_by_neighborhood = sale_price_by_neighborhood
 
     def fit(self, X: pd.DataFrame, y=None):
-        self._neighborhood_stats = X.groupby(Neighborhood)[GrLivArea].agg(
-            ['median', lambda x: np.quantile(x, 0.75)])
-        self._neighborhood_stats.columns = ['50%', '75%']
-        self._neighborhood_stats.reset_index(inplace=True)
+        if self._relative_GrLivArea:
+            self._neighborhood_area_quantiles = X.groupby(Neighborhood)[GrLivArea].agg(
+                ['median', lambda x: np.quantile(x, 0.75)])
+            self._neighborhood_area_quantiles.columns = ['50%', '75%']
+            self._neighborhood_area_quantiles.reset_index(inplace=True)
+
+        if self._sale_price_by_neighborhood:
+            self._neighborhood_price_medians = X.groupby(Neighborhood)[SalePrice].median().reset_index(
+                name='MedianSalePrice')
+
+            percentile_25 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.25)
+            percentile_75 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.75)
+
+            def classify_neighborhood(price):
+                if price <= percentile_25:
+                    return 'Low'
+                elif price >= percentile_75:
+                    return 'High'
+                else:
+                    return 'Medium'
+
+            self._neighborhood_price_medians['NeibLevel'] = self._neighborhood_price_medians['MedianSalePrice'].apply(
+                classify_neighborhood)
 
         return super().fit(X, y)
 
     def transform(self, X: pd.DataFrame):
         new_X = X.copy()
-        X_with_stats = pd.merge(X, self._neighborhood_stats, on=Neighborhood, how='left').set_index(X.index)
-        new_X['SizeRelativeToMedian'] = X_with_stats[GrLivArea] / X_with_stats['50%']
-        new_X['IsInTopQuartile'] = (X_with_stats[GrLivArea] > X_with_stats['75%']).astype(int)
+
+        if self._relative_GrLivArea:
+            X_with_stats = pd.merge(X, self._neighborhood_area_quantiles, on=Neighborhood, how='left').set_index(
+                X.index)
+            new_X['SizeRelativeToMedian'] = X_with_stats[GrLivArea] / X_with_stats['50%']
+            new_X['IsInTopQuartile'] = (X_with_stats[GrLivArea] > X_with_stats['75%']).astype(int)
+
+        if self._sale_price_by_neighborhood:
+            new_X = pd.merge(new_X, self._neighborhood_price_medians[['Neighborhood', 'NeibLevel']],
+                             on='Neighborhood', how='left').set_index(X.index)
         return new_X
