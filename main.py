@@ -19,11 +19,11 @@ if __name__ == "__main__":
     """
     Run baseline model flow
     """
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     # get raw data
     logging.info(f"Loading data...")
-    train_raw_data, test_raw_data = get_raw_data_packs['V0']['function']()
+    train_raw_data, test_raw_data = get_raw_data_packs['V1']['function']()
 
     # split into folds
     logging.info(f"Splitting raw data into folds...")

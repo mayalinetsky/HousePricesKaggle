@@ -25,7 +25,8 @@ from raw_data import get_raw_data
 from raw_data_folding import BaseTrainValTestSplitter
 
 get_raw_data_packs = {
-    "V0": {"function": get_raw_data}
+    "V0": {"function": get_raw_data},
+    "V1": {"function": lambda: get_raw_data(filter_samples=True)}
 }
 
 cross_validation_packs = {
