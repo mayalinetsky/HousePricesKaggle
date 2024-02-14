@@ -5,7 +5,6 @@ import logging
 
 import pandas as pd
 from constants import *
-from utils import calc_numeric_feature_correlation
 
 
 def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
@@ -31,10 +30,8 @@ def preprocess(data: pd.DataFrame):
     return data
 
 
-def drop_columns(data: pd.DataFrame):
+def drop_known_columns(data: pd.DataFrame):
     data = data.copy()
-
-    data = _drop_highly_correlated_numeric_features(data)
 
     data = _drop_categorical_features_w_low_correlation_to_target(data)
 
@@ -74,22 +71,6 @@ def _convert_pool_features_to_binary(data: pd.DataFrame, inplace: bool = True):
 
 def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):
     return data['GarageYrBlt'].fillna(data['YearBuilt'], inplace=inplace)
-
-
-def _drop_highly_correlated_numeric_features(data: pd.DataFrame, threshold: float = 0.7):
-    """
-    Calculates the correlation between all pairs of numeric features in the dataframe, looks at all the pairs
-    with correlation above the threshold, and drops the second feature in these pairs.
-    """
-    numeric_correlations = calc_numeric_feature_correlation(data)
-
-    highly_correlated_numeric_features = [t for t in numeric_correlations if t[2] >= threshold]
-
-    high_correlated_features_to_drop = [t[1] for t in highly_correlated_numeric_features]
-
-    logging.debug(f"Dropping the following highly correlated numeric features: {high_correlated_features_to_drop}")
-
-    return data.drop(columns=high_correlated_features_to_drop, errors='ignore')
 
 
 def _drop_categorical_features_w_low_correlation_to_target(data: pd.DataFrame):
