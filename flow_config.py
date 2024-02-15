@@ -12,7 +12,7 @@ Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, RobustScaler
 from sklearn.compose import ColumnTransformer
 from constants import *
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
@@ -96,7 +96,8 @@ preprocessing_packs = {
                      NoFitPreProcessor([drop_known_columns]),
                      CorrelatedNumericFeaturesDropper(),
                      OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
-                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')
+                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas'),
+                     RobustScaler()
                      ],
            }
 
