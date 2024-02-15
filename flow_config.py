@@ -9,7 +9,9 @@ feature_extraction_packs/feature_target_separation_packs/preprocessing_packs/lab
 make sure you add the key to all other manipulation packs.
 Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1' to all other manipulation packs.
 """
+import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
@@ -94,7 +96,6 @@ preprocessing_packs = {
                          remainder='passthrough'
                      ),
                      NoFitPreProcessor([drop_known_columns]),
-                     CorrelatedNumericFeaturesDropper(),
                      OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
                      SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')
                      ],
@@ -110,5 +111,9 @@ labeling_packs = {
 model_grid_search_params = {
     "LinearRegression": {"class": LinearRegression,
                          "args": {}  # insert here list of hyper-parameters
-                         }
+                         },
+    "RandomForestRegressor": {"class": RandomForestRegressor,
+                              "args": {'n_estimators': [100],
+                                       'max_depth': np.arange(2, 10, 1),
+                                       'min_samples_leaf': [10]}}
 }

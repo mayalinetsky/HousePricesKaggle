@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # split into folds
     logging.info(f"Splitting raw data into folds...")
-    cv_splitter_config = cross_validation_packs['TrainTrainTest']
+    cv_splitter_config = cross_validation_packs['AllUntilMonthSplitter']
     cv_splitter = cv_splitter_config['class'](*cv_splitter_config['args'])
     raw_folds = cv_splitter.split(train_raw_data, test_raw_data)
 
@@ -40,12 +40,12 @@ if __name__ == "__main__":
         processed_fold = process_fold(raw_fold,
                                       feature_extraction_pack=feature_extraction_packs["V1"],
                                       feature_target_separation_pack=feature_target_separation_packs["V0"],
-                                      preprocessing_pack=preprocessing_packs["V1"],
+                                      preprocessing_pack=preprocessing_packs["V0"],
                                       labeling_pack=labeling_packs["V0"])
         processed_folds.append(processed_fold)
 
     logging.info(f"All datasets ready.")
-    model_grid_search_config = model_grid_search_params['LinearRegression']
+    model_grid_search_config = model_grid_search_params['RandomForestRegressor']
 
     test_predictions_per_fold: list[pd.Series] = []
 

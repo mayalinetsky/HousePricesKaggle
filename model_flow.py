@@ -72,7 +72,7 @@ def tune_hyper_params(processed_fold: ProcessedFold, model_pack: dict):
     model = model_pack['class']()
     param_grid = model_pack['args']
 
-    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=train_val_indices, scoring=rmse_log_scorer)
+    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=train_val_indices, scoring=rmse_log_scorer, n_jobs=-1)
     clf.fit(train_val_combined_X, train_val_combined_y)
 
     return clf

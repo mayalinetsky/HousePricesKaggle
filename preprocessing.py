@@ -10,7 +10,7 @@ from constants import *
 def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
 
-    _fill_na_GarageYrBlt_w_YearBuilt(data)
+    # _fill_na_GarageYrBlt_w_YearBuilt(data)
 
     return data.select_dtypes(include='number')
 
