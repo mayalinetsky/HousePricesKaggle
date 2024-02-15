@@ -113,12 +113,19 @@ def group_roofstyle_roofmatl(data: pd.DataFrame) -> pd.DataFrame:
 
 def extract_asset_age(data: pd.DataFrame):
     """
-    Calculate the asset age. If the asset was remodeled, the age is calculated using the remodel year.
-    TODO this means we will treat a 50 year old appt that has just been remodeled as a new appt?
+    Calculate the asset age: YrSold - YearBuilt
     """
-    data[AssetAge] = data[YrSold] - data[[YearBuilt, YearRemodAdd]].max(axis=1)
+    data[AssetAge] = data[YrSold] - data[YearBuilt]
 
-    return data.drop(columns=[YearBuilt, YearRemodAdd])
+    return data.drop(columns=[YearBuilt])
+
+
+def binarize_year_remodeled(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Binarize the YearRemodAdd to True/False
+    """
+    data[Remodeled] = (data[YearRemodAdd]-data[YearBuilt]).astype(bool).astype('category')
+    return data.drop(columns=[YearRemodAdd])
 
 
 class RelativeFeatureExtractor(FeatureExtractor):
@@ -131,55 +138,63 @@ class RelativeFeatureExtractor(FeatureExtractor):
     - NeibLevel - Neighborhood pricing level
     """
 
-    def __init__(self, relative_LivArea=True, sale_price_by_neighborhood=True):
+    def __init__(self, relative_LivArea=True,
+                 sale_price_by_neighborhood=True):
         super().__init__()
         self._neighborhood_area_quantiles = None
         self._neighborhood_price_medians = None
         self._neigh_price_prct_25 = None
         self._neigh_price_prct_75 = None
 
-        self._relative_LivArea = relative_LivArea
-        self._sale_price_by_neighborhood = sale_price_by_neighborhood
+        self._calc_relative_LivArea = relative_LivArea
+        self._calc_sale_price_by_neighborhood = sale_price_by_neighborhood
 
     def fit(self, X: pd.DataFrame, y=None):
-        if self._relative_LivArea:
-            self._neighborhood_area_quantiles = X.groupby(Neighborhood)[TotalArea].agg(
-                ['median', lambda x: np.quantile(x, 0.75)])
-            self._neighborhood_area_quantiles.columns = ['50%', '75%']
-            self._neighborhood_area_quantiles.reset_index(inplace=True)
+        if self._calc_relative_LivArea:
+            self._fit_relative_liv_area(X, y)
 
-        if self._sale_price_by_neighborhood:
-            self._neighborhood_price_medians = X.groupby(Neighborhood)[SalePrice].median().reset_index(
-                name='MedianSalePrice')
-
-            percentile_25 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.25)
-            percentile_75 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.75)
-
-            def classify_neighborhood(price):
-                if price <= percentile_25:
-                    return 0
-                elif price >= percentile_75:
-                    return 1
-                else:
-                    return 2
-
-            self._neighborhood_price_medians[NeibLevel] = self._neighborhood_price_medians['MedianSalePrice'].apply(
-                classify_neighborhood)
+        if self._calc_sale_price_by_neighborhood:
+            self._fit_sale_price_by_neib(X, y)
 
         return super().fit(X, y)
+
+    def _fit_relative_liv_area(self, X: pd.DataFrame, y=None):
+        self._neighborhood_area_quantiles = X.groupby(Neighborhood)[TotalArea].agg(
+            ['median', lambda x: np.quantile(x, 0.75)])
+        self._neighborhood_area_quantiles.columns = ['50%', '75%']
+        self._neighborhood_area_quantiles.reset_index(inplace=True)
+
+    def _fit_sale_price_by_neib(self, X: pd.DataFrame, y=None):
+        self._neighborhood_price_medians = X.groupby(Neighborhood)[SalePrice].median().reset_index(
+            name='MedianSalePrice')
+
+        percentile_25 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.25)
+        percentile_75 = self._neighborhood_price_medians['MedianSalePrice'].quantile(0.75)
+
+        def classify_neighborhood(price):
+            if price <= percentile_25:
+                return 0
+            elif price >= percentile_75:
+                return 1
+            else:
+                return 2
+
+        self._neighborhood_price_medians[NeibLevel] = self._neighborhood_price_medians['MedianSalePrice'].apply(
+            classify_neighborhood)
 
     def transform(self, X: pd.DataFrame):
         new_X = X.copy()
 
-        if self._relative_LivArea:
+        if self._calc_relative_LivArea:
             X_with_stats = pd.merge(X, self._neighborhood_area_quantiles, on=Neighborhood, how='left').set_index(
                 X.index)
             new_X[SizeRelativeToMedian] = X_with_stats[TotalArea] / X_with_stats['50%']
             new_X[IsInTopQuartile] = (X_with_stats[TotalArea] > X_with_stats['75%']).astype(int)
 
-        if self._sale_price_by_neighborhood:
+        if self._calc_sale_price_by_neighborhood:
             new_X = pd.merge(new_X, self._neighborhood_price_medians[[Neighborhood, NeibLevel]],
                              on=Neighborhood, how='left').set_index(X.index)
+
         return new_X
 
 
@@ -188,6 +203,7 @@ class CorrelatedNumericFeaturesDropper(FeatureExtractor):
     Calculates the correlation between all pairs of numeric features in the dataframe, looks at all the pairs
     with correlation above the threshold, and drops the second feature in these pairs.
     """
+
     def __init__(self, threshold: float = 0.7):
         self.threshold = threshold
         self._columns_to_drop = []

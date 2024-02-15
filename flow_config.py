@@ -16,7 +16,8 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from constants import *
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
-    CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age
+    CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age, \
+    binarize_year_remodeled
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess
@@ -42,6 +43,7 @@ feature_extraction_packs = {
                                         join_liv_bsmt_areas,
                                         group_exterior_covering,
                                         group_roofstyle_roofmatl,
+                                        binarize_year_remodeled,
                                         extract_asset_age]),
                      RelativeFeatureExtractor()]}
 }

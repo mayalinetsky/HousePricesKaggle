@@ -23,3 +23,5 @@ RoofStyleGroup = 'RoofStyleGroup'
 RoofMatlGroup = 'RoofMatlGroup'
 
 AssetAge = 'AssetAge'
+
+Remodeled = 'Remodeled'
