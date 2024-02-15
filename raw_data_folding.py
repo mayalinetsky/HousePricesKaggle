@@ -5,28 +5,29 @@ from custom_types import RawFold
 import numpy as np
 import pandas as pd
 
+
 class BaseTrainValTestSplitter:
     """
     Produces only 1 fold with the validation set being the train set.
     (This is used for the baseline)
     """
+
     def __init__(self, *args, **kwargs):
         pass
 
-    # couldn't understand if you put twice train_rawdata by mistake or just as a placeholder, so I wrote a new method
-    # downwards, using "val_rawdata" instead
-    def split(self, train_rawdata, test_rawdata) -> list[RawFold]:
-
-        return [RawFold(train_rawdata, train_rawdata, test_rawdata)]
+    # couldn't understand if you put twice train_rawdata by mistake or just as a placeholder,
+    # so I wrote a new method downwards, using "val_rawdata" instead
 
 
-
+    # def split(self, train_rawdata, test_rawdata) -> list[RawFold]:
+    #     return [RawFold(train_rawdata, train_rawdata, test_rawdata)]
 
     def split(self, train_rawdata, test_rawdata) -> list[RawFold]:
         """
         Splitting the train data into train and val according to the shortest Euclidean distance from test
         Assuming the data was preprocessed: contains no nans and categorical features were encoded as numeric
         """
+
         def _calculate_euclidean_distances(train, test):
             # Reshape to enable broadcasting
             train_reshaped = train[:, np.newaxis, :]
@@ -56,5 +57,6 @@ class BaseTrainValTestSplitter:
 
         # Split the DataFrame into train and validation using iloc
         val_rawdata = train_rawdata.iloc[selected_items_indices.flatten()]
-        validation_df = train_rawdata.drop(val_rawdata.index)
+        train_rawdata = train_rawdata.drop(val_rawdata.index)
+
         return [RawFold(train_rawdata, val_rawdata, test_rawdata)]
