@@ -23,7 +23,7 @@ from labeling import produce_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess
 from preprocessors import NoFitPreProcessor
 from raw_data import get_raw_data
-from raw_data_folding import BaseTrainValTestSplitter
+from raw_data_folding import BaseTrainValTestSplitter, AllUntilMonthSplitter
 
 get_raw_data_packs = {
     "V0": {"function": get_raw_data},
@@ -33,7 +33,9 @@ get_raw_data_packs = {
 cross_validation_packs = {
     "TrainTrainTest": {"class": BaseTrainValTestSplitter,
                        "args": {}
-                       }
+                       },
+    "AllUntilMonthSplitter": {"class": AllUntilMonthSplitter,
+                              "args": {}}
 }
 
 # from name to arguments for a pipeline
