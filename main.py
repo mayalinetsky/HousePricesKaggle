@@ -40,7 +40,7 @@ if __name__ == "__main__":
         processed_fold = process_fold(raw_fold,
                                       feature_extraction_pack=feature_extraction_packs["V1"],
                                       feature_target_separation_pack=feature_target_separation_packs["V0"],
-                                      preprocessing_pack=preprocessing_packs["V0"],
+                                      preprocessing_pack=preprocessing_packs["V1"],
                                       labeling_pack=labeling_packs["V0"])
         processed_folds.append(processed_fold)
 
