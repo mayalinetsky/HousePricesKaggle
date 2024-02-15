@@ -21,13 +21,20 @@ if __name__ == "__main__":
     """
     logging.basicConfig(level=logging.DEBUG)
 
+    FEATURE_EXTRACTION_PACK = "V1"
+    FEAT_TARGET_SEPARATION_PACK = "V0"
+    PREPROCESSING_PACK = "V1"
+    LABELING_PACK = "V1"
+    CROSS_VALIDATION_PACK = "AllUntilMonthSplitter"
+    MODEL_PACK = 'LinearRegression'
+
     # get raw data
     logging.info(f"Loading data...")
     train_raw_data, test_raw_data = get_raw_data_packs['V1']['function']()
 
     # split into folds
     logging.info(f"Splitting raw data into folds...")
-    cv_splitter_config = cross_validation_packs['TrainTrainTest']
+    cv_splitter_config = cross_validation_packs[CROSS_VALIDATION_PACK]
     cv_splitter = cv_splitter_config['class'](*cv_splitter_config['args'])
     raw_folds = cv_splitter.split(train_raw_data, test_raw_data)
 
@@ -38,14 +45,14 @@ if __name__ == "__main__":
     for fold_index, raw_fold in enumerate(raw_folds, start=1):
         logging.info(f"\tFold {fold_index}/{len(raw_folds)}")
         processed_fold = process_fold(raw_fold,
-                                      feature_extraction_pack=feature_extraction_packs["V1"],
-                                      feature_target_separation_pack=feature_target_separation_packs["V0"],
-                                      preprocessing_pack=preprocessing_packs["V1"],
-                                      labeling_pack=labeling_packs["V0"])
+                                      feature_extraction_pack=feature_extraction_packs[FEATURE_EXTRACTION_PACK],
+                                      feature_target_separation_pack=feature_target_separation_packs[FEAT_TARGET_SEPARATION_PACK],
+                                      preprocessing_pack=preprocessing_packs[PREPROCESSING_PACK],
+                                      labeling_pack=labeling_packs[LABELING_PACK])
         processed_folds.append(processed_fold)
 
     logging.info(f"All datasets ready.")
-    model_grid_search_config = model_grid_search_params['LinearRegression']
+    model_grid_search_config = model_grid_search_params[MODEL_PACK]
 
     test_predictions_per_fold: list[pd.Series] = []
 
@@ -59,7 +66,9 @@ if __name__ == "__main__":
         logging.info(f"\tFound best estimator. Best score: {clf.best_score_}")
         best_model = clf.best_estimator_
 
-        test_predictions = best_model.predict(fold.test_X_y[0])
+        test_predictions_ = best_model.predict(fold.test_X_y[0])
+
+        test_predictions = labeling_packs[LABELING_PACK]['inverse'](test_predictions_)
 
         test_predictions_series = pd.Series(test_predictions, index=fold.test_X_y[0].index)
 

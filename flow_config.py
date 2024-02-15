@@ -9,6 +9,7 @@ feature_extraction_packs/feature_target_separation_packs/preprocessing_packs/lab
 make sure you add the key to all other manipulation packs.
 Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1' to all other manipulation packs.
 """
+import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
@@ -19,7 +20,7 @@ from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatu
     CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age, \
     binarize_year_remodeled
 from feature_target_separation import separate_features_and_target
-from labeling import produce_target
+from labeling import produce_target, produce_log_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess
 from preprocessors import NoFitPreProcessor
 from raw_data import get_raw_data
@@ -104,7 +105,10 @@ preprocessing_packs = {
 }
 
 labeling_packs = {
-    "V0": {"function": produce_target}
+    "V0": {"function": produce_target,
+           "inverse": lambda predictions: predictions},
+    "V1": {"function": produce_log_target,
+           "inverse": lambda predictions: np.expm1(predictions)}
 }
 
 # from model name to params
