@@ -45,17 +45,19 @@ def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     """
     preprocess features with NaN values that reflect 'None' and should not be discarded (should be counted)
     """
-    relevant_columns = [BsmtQual, BsmtCond, FireplaceQu, GarageType,
-                        GarageFinish, GarageQual, GarageCond, BsmtExposure, BsmtFinType1, PoolQC,
+    relevant_columns = [BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1,
+                        FireplaceQu,
+                        GarageType, GarageFinish, GarageQual, GarageCond,
+                        PoolQC,
+                        MasVnrType,
                         MiscFeature]
 
-    for feature in relevant_columns:
-        try:
-            tmp = data[feature].fillna(value='None', inplace=inplace)
-            if not inplace:
-                data[feature] = tmp
-        except KeyError:
-            pass
+    columns_to_fill = list(set(relevant_columns) & set(data.columns))
+    tmp = data.loc[:, columns_to_fill].fillna(value='None', inplace=inplace)
+
+    if not inplace:
+        data.loc[:, columns_to_fill] = tmp
+        
     return data
 
 
