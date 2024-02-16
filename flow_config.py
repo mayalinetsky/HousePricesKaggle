@@ -155,6 +155,26 @@ preprocessing_packs = {
                          transform='pandas'),
                      RobustScaler()
                      ],
+           },
+    "V7": {"steps": [NoFitPreProcessor([preprocess]),
+                     ColumnTransformer(transformers=[
+                         ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
+                         ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
+                         ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
+                         ('one_hot1',
+                          OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning])
+                     ],
+                         remainder='passthrough',
+                         verbose_feature_names_out=False,
+                     ),
+                     NoFitPreProcessor([drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(
+                         transform='pandas'),
+                     RobustScaler()
+                     ],
            }
 
 }
@@ -191,12 +211,12 @@ model_grid_search_params = {
                               },
     "TunedRandomForestRegressor": {"class": RandomForestRegressor,
                                    "args": {'n_jobs': [-1],
-                                            'n_estimators': [50, 100, 1000, 3000],
-                                            'max_depth': [None, 4, 10, 20, 100],
-                                            'max_features': ['sqrt', 1.0],
-                                            'min_samples_leaf': [1, 2, 3, 10, 15],
-                                            'criterion': ['squared_error', 'absolute_error'],
-                                            'oob_score': [False, True],
+                                            'n_estimators': [100],
+                                            'max_depth': [4, 10, 20, 100],
+                                            # 'max_features': ['sqrt', 1.0],
+                                            # 'min_samples_leaf': [1, 2, 3, 10, 15],
+                                            # 'criterion': ['squared_error', 'absolute_error'],
+                                            'oob_score': [False],
                                             'ccp_alpha': [0, 0.01, 0.1, 1, 10, 100],
                                             'random_state': [42]
                                             }

@@ -25,9 +25,9 @@ if __name__ == "__main__":
     FEATURE_EXTRACTION_PACK = "V1"
     FEAT_TARGET_SEPARATION_PACK = "V0"
     PREPROCESSING_PACK = "V7"
-    LABELING_PACK = "V0"
+    LABELING_PACK = "V1"
     CROSS_VALIDATION_PACK = "AllUntilMonthSplitter"
-    MODEL_PACK = 'RandomForestRegressor'
+    MODEL_PACK = 'TunedRandomForestRegressor'
 
     # get raw data
     logging.info(f"Loading data...")

@@ -32,7 +32,15 @@ def preprocess(data: pd.DataFrame):
 
     _fill_na_LotFrontage_w_neib_median(data)
 
+    _convert_month_year_to_cat(data)
+
     return data
+
+
+def _convert_month_year_to_cat(data: pd.DataFrame):
+    data.loc[:, MoSold] = data[MoSold].astype(str)
+
+    data.loc[:, YrSold] = data[YrSold].astype(str)
 
 
 def drop_known_columns(data: pd.DataFrame):
