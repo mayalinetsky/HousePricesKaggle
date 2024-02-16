@@ -134,7 +134,25 @@ preprocessing_packs = {
                                         drop_known_columns,
                                         drop_globally_gathered_columns,
                                         lambda d: d.select_dtypes(include='number')]),
-                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(transform='pandas'),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(
+                         transform='pandas'),
+                     RobustScaler()
+                     ],
+           },
+    "V6": {"steps": [NoFitPreProcessor([preprocess]),
+                     ColumnTransformer(transformers=[
+                         ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
+                         ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
+                         ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
+                     ],
+                         remainder='passthrough',
+                         verbose_feature_names_out=False,
+                     ),
+                     NoFitPreProcessor([drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(
+                         transform='pandas'),
                      RobustScaler()
                      ],
            }
@@ -160,8 +178,29 @@ model_grid_search_params = {
                        'solver': ['auto']}
               },
     "RandomForestRegressor": {"class": RandomForestRegressor,
-                              "args": {'n_jobs': [-1]}
+                              "args": {'n_jobs': [-1],
+                                       # 'n_estimators': [50, 100, 1000, 3000],
+                                       # 'max_depth': [4],
+                                       # 'max_features': ['sqrt', 1.0],
+                                       # 'min_samples_leaf': [15],
+                                       # 'criterion': ['squared_error', 'absolute_error'],
+                                       # 'oob_score': [True],
+                                       # 'ccp_alpha': [0, 0.01, 0.1, 1, 10, 100],
+                                       'random_state': [42]
+                                       }
                               },
+    "TunedRandomForestRegressor": {"class": RandomForestRegressor,
+                                   "args": {'n_jobs': [-1],
+                                            'n_estimators': [50, 100, 1000, 3000],
+                                            'max_depth': [None, 4, 10, 20, 100],
+                                            'max_features': ['sqrt', 1.0],
+                                            'min_samples_leaf': [1, 2, 3, 10, 15],
+                                            'criterion': ['squared_error', 'absolute_error'],
+                                            'oob_score': [False, True],
+                                            'ccp_alpha': [0, 0.01, 0.1, 1, 10, 100],
+                                            'random_state': [42]
+                                            }
+                                   },
     "GradientBoostingRegressor": {"class": GradientBoostingRegressor,
                                   "args": {'n_estimators': [100, 1000, 3000],
                                            'learning_rate': np.logspace(-4, 1, 10),

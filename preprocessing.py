@@ -2,6 +2,7 @@
 Simple functions for preprocessors
 """
 import logging
+import warnings
 
 import pandas as pd
 from constants import *
@@ -74,7 +75,15 @@ def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):
 
 
 def _fill_na_LotFrontage_w_neib_median(data: pd.DataFrame):
-    data.loc[:, LotFrontage] = data.groupby(Neighborhood)[LotFrontage].transform(lambda x: x.fillna(x.median()))
+    def fill_w_median_or_zero(x):
+        with warnings.catch_warnings():  # catching 'mean of an empty slice'
+            warnings.simplefilter("error", category=RuntimeWarning)
+            try:
+                return x.fillna(x.median())
+            except RuntimeWarning:
+                return x.fillna(0)
+
+    data.loc[:, LotFrontage] = data.groupby(Neighborhood)[LotFrontage].transform(fill_w_median_or_zero)
     return data
 
 
