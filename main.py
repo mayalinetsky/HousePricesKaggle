@@ -24,7 +24,7 @@ if __name__ == "__main__":
     GET_RAW_DATA_PACK = "V1"
     FEATURE_EXTRACTION_PACK = "V1"
     FEAT_TARGET_SEPARATION_PACK = "V0"
-    PREPROCESSING_PACK = "V6"
+    PREPROCESSING_PACK = "V7"
     LABELING_PACK = "V0"
     CROSS_VALIDATION_PACK = "AllUntilMonthSplitter"
     MODEL_PACK = 'RandomForestRegressor'
@@ -84,9 +84,9 @@ if __name__ == "__main__":
         test_predictions_per_fold.append(test_predictions_series)
 
     weighted_score_all_folds = weighted_score_all_folds/total_fold_weight
-    logging.info(f"Done tuning hyper-params. Weighted score on all folds: {weighted_score_all_folds}")
+    logging.info(f"Done tuning hyper-params.\nWeighted score on all folds: {weighted_score_all_folds}")
 
-    logging.info(f"Done tuning hyper-params. Preparing final predictions...")
+    logging.info(f"Preparing final predictions...")
     final_test_predictions = pd.concat(test_predictions_per_fold)
     prepare_submission_csv(final_test_predictions.index,
                            final_test_predictions.values,

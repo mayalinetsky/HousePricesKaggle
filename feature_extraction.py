@@ -178,7 +178,7 @@ def binarize_year_remodeled(data: pd.DataFrame) -> pd.DataFrame:
     """
     Binarize the YearRemodAdd to True/False
     """
-    data[Remodeled] = (data[YearRemodAdd] - data[YearBuilt]).astype(bool).astype('category')
+    data[Remodeled] = (data[YearRemodAdd] - data[YearBuilt]).astype(bool).astype(int)
     COLUMNS_TO_DROP_AT_END.extend([YearRemodAdd])
     return data
 
