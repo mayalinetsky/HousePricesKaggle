@@ -56,6 +56,9 @@ if __name__ == "__main__":
 
     test_predictions_per_fold: list[pd.Series] = []
 
+    weighted_score_all_folds = 0
+    total_fold_weight = 0
+
     # hyper-param tuning on Prepped Folds
     logging.info(f"Tuning hyperparameters for each dataset...")
     for fold_index, fold in enumerate(processed_folds, start=1):
@@ -63,7 +66,12 @@ if __name__ == "__main__":
 
         clf = tune_hyper_params(fold, model_grid_search_config)
 
-        logging.info(f"\tFound best estimator. Best score: {clf.best_score_}")
+        logging.info(f"\tFound best estimator. Best score: {clf.best_score_}, Best params: {clf.best_params_}")
+
+        fold_weight = len(fold.test_X_y[1])
+        total_fold_weight += fold_weight
+        weighted_score_all_folds += fold_weight * clf.best_score_
+
         best_model = clf.best_estimator_
 
         test_predictions_ = best_model.predict(fold.test_X_y[0])
@@ -73,6 +81,8 @@ if __name__ == "__main__":
         test_predictions_series = pd.Series(test_predictions, index=fold.test_X_y[0].index)
 
         test_predictions_per_fold.append(test_predictions_series)
+
+    logging.info(f"Done tuning hyper-params. Weighted score on all folds: {weighted_score_all_folds/total_fold_weight}")
 
     logging.info(f"Done tuning hyper-params. Preparing final predictions...")
     final_test_predictions = pd.concat(test_predictions_per_fold)
