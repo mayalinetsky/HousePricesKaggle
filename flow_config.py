@@ -23,7 +23,7 @@ from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatu
     binarize_year_remodeled
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target, produce_log_target
-from preprocessing import baseline_preprocess, drop_known_columns, preprocess
+from preprocessing import baseline_preprocess, drop_known_columns, preprocess, drop_globally_gathered_columns
 from preprocessors import NoFitPreProcessor
 from raw_data import get_raw_data
 from raw_data_folding import BaseTrainValTestSplitter, AllUntilMonthSplitter
@@ -97,9 +97,14 @@ preprocessing_packs = {
                      ],
                          remainder='passthrough'
                      ),
-                     NoFitPreProcessor([drop_known_columns]),
+                     NoFitPreProcessor([drop_known_columns, drop_globally_gathered_columns]),
                      OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
                      SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas'),
+                     RobustScaler()
+                     ],
+           },
+    "V2": {"steps": [NoFitPreProcessor([baseline_preprocess, drop_globally_gathered_columns]),
+                     SimpleImputer(missing_values=pd.NA, strategy="mean").set_output(transform='pandas'),
                      RobustScaler()
                      ],
            }

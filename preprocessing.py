@@ -6,6 +6,8 @@ import logging
 import pandas as pd
 from constants import *
 
+COLUMNS_TO_DROP_AT_END = []
+
 
 def baseline_preprocess(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
@@ -22,6 +24,8 @@ def preprocess(data: pd.DataFrame):
     2. Convert 'PoolArea' and 'PoolQC' to one binary feature 'HavePool'
     """
     data = data.copy()
+
+    _fill_na_GarageYrBlt_w_YearBuilt(data)
 
     _convert_nan_to_str(data)
 
@@ -41,18 +45,22 @@ def drop_known_columns(data: pd.DataFrame):
     return data
 
 
+def drop_globally_gathered_columns(data: pd.DataFrame):
+    return data.drop(columns=COLUMNS_TO_DROP_AT_END, errors='ignore')
+
+
 def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     """
     preprocess features with NaN values that reflect 'None' and should not be discarded (should be counted)
     """
-    relevant_columns = [BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1,
-                        FireplaceQu,
-                        GarageType, GarageFinish, GarageQual, GarageCond,
-                        PoolQC,
-                        MasVnrType,
-                        MiscFeature]
+    # relevant_columns = [BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1,
+    #                     FireplaceQu,
+    #                     GarageType, GarageFinish, GarageQual, GarageCond,
+    #                     PoolQC,
+    #                     MasVnrType,
+    #                     MiscFeature]
 
-    columns_to_fill = list(set(relevant_columns) & set(data.columns))
+    columns_to_fill = data.select_dtypes(include='object').columns
     tmp = data.loc[:, columns_to_fill].fillna(value='None', inplace=inplace)
 
     if not inplace:
@@ -61,14 +69,15 @@ def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     return data
 
 
-def _convert_pool_features_to_binary(data: pd.DataFrame, inplace: bool = True):
+def _convert_pool_features_to_binary(data: pd.DataFrame):
     """
     only 7 samples with pool, but might be important, so:
     we create new *binary* feature 'HavePool' and drop 'PoolQC' 'PoolArea'
     """
     data.loc[data['PoolArea'] != 0, 'HavePool'] = 1
     data.loc[data['PoolArea'] == 0, 'HavePool'] = 0
-    return data.drop(['PoolArea', 'PoolQC'], axis=1, errors='ignore', inplace=inplace)
+    COLUMNS_TO_DROP_AT_END.extend(['PoolArea', 'PoolQC'])
+    return data
 
 
 def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):

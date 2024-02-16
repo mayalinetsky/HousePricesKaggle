@@ -21,7 +21,8 @@ if __name__ == "__main__":
     """
     logging.basicConfig(level=logging.DEBUG)
 
-    FEATURE_EXTRACTION_PACK = "V0"
+    GET_RAW_DATA_PACK = "V1"
+    FEATURE_EXTRACTION_PACK = "V1"
     FEAT_TARGET_SEPARATION_PACK = "V0"
     PREPROCESSING_PACK = "V0"
     LABELING_PACK = "V0"
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
     # get raw data
     logging.info(f"Loading data...")
-    train_raw_data, test_raw_data = get_raw_data_packs['V1']['function']()
+    train_raw_data, test_raw_data = get_raw_data_packs[GET_RAW_DATA_PACK]['function']()
 
     # split into folds
     logging.info(f"Splitting raw data into folds...")
@@ -82,10 +83,20 @@ if __name__ == "__main__":
 
         test_predictions_per_fold.append(test_predictions_series)
 
-    logging.info(f"Done tuning hyper-params. Weighted score on all folds: {weighted_score_all_folds/total_fold_weight}")
+    weighted_score_all_folds = weighted_score_all_folds/total_fold_weight
+    logging.info(f"Done tuning hyper-params. Weighted score on all folds: {weighted_score_all_folds}")
 
     logging.info(f"Done tuning hyper-params. Preparing final predictions...")
     final_test_predictions = pd.concat(test_predictions_per_fold)
-    prepare_submission_csv(final_test_predictions.index, final_test_predictions.values)
+    prepare_submission_csv(final_test_predictions.index,
+                           final_test_predictions.values,
+                           weighted_score_all_folds,
+                           GET_RAW_DATA_PACK,
+                           CROSS_VALIDATION_PACK,
+                           FEATURE_EXTRACTION_PACK,
+                           FEAT_TARGET_SEPARATION_PACK,
+                           PREPROCESSING_PACK,
+                           LABELING_PACK,
+                           MODEL_PACK)
 
     logging.info(f"Done.")

@@ -12,6 +12,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 from constant_extracted import *
 from constants import *
 from utils import calc_numeric_feature_correlation
+from preprocessing import COLUMNS_TO_DROP_AT_END
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin):
@@ -50,7 +51,8 @@ def join_porch_areas(x: pd.DataFrame):
 
     x[TotClosePorchSF] = x[close_porches].apply(join_areas, axis=1)
     x[TotOpenPorchSF] = x[open_porches].apply(join_areas, axis=1)
-    x.drop(columns=close_porches + open_porches, inplace=True)
+
+    COLUMNS_TO_DROP_AT_END.extend(close_porches + open_porches)
     return x
 
 
@@ -68,7 +70,9 @@ def join_liv_bsmt_areas(x: pd.DataFrame):
     # columns that should probably be dropped:
     columns_to_drop = [TotalBsmtSF, GrLivArea, BsmtFinSF2, SecondFlrSF]
 
-    return x.drop(columns=columns_to_drop)
+    COLUMNS_TO_DROP_AT_END.extend(columns_to_drop)
+
+    return x
 
 
 def group_exterior_covering(x: pd.DataFrame):
@@ -96,7 +100,9 @@ def group_exterior_covering(x: pd.DataFrame):
     x[Exterior1stGroup] = x[Exterior1st].apply(map_material)
     x[Exterior2ndGroup] = x[Exterior2nd].apply(map_material)
 
-    return x.drop(columns=[Exterior1st, Exterior2nd])
+    COLUMNS_TO_DROP_AT_END.extend([Exterior1st, Exterior2nd])
+
+    return x
 
 
 def group_roofstyle_roofmatl(data: pd.DataFrame) -> pd.DataFrame:
@@ -108,7 +114,8 @@ def group_roofstyle_roofmatl(data: pd.DataFrame) -> pd.DataFrame:
     data[RoofMatlGroup] = data[RoofMatl].apply(
         lambda x: 'CompShg' if x == 'CompShg' else 'Other')  # Converts into 2 groups
 
-    return data.drop(columns=[RoofStyle, RoofMatl])
+    COLUMNS_TO_DROP_AT_END.extend([RoofStyle, RoofMatl])
+    return data
 
 
 def extract_asset_age(data: pd.DataFrame):
@@ -117,7 +124,8 @@ def extract_asset_age(data: pd.DataFrame):
     """
     data[AssetAge] = data[YrSold] - data[YearBuilt]
 
-    return data.drop(columns=[YearBuilt])
+    COLUMNS_TO_DROP_AT_END.extend([YearBuilt])
+    return data
 
 
 def binarize_year_remodeled(data: pd.DataFrame) -> pd.DataFrame:
@@ -125,7 +133,8 @@ def binarize_year_remodeled(data: pd.DataFrame) -> pd.DataFrame:
     Binarize the YearRemodAdd to True/False
     """
     data[Remodeled] = (data[YearRemodAdd]-data[YearBuilt]).astype(bool).astype('category')
-    return data.drop(columns=[YearRemodAdd])
+    COLUMNS_TO_DROP_AT_END.extend([Remodeled])
+    return data
 
 
 class RelativeFeatureExtractor(FeatureExtractor):
@@ -224,4 +233,5 @@ class CorrelatedNumericFeaturesDropper(FeatureExtractor):
 
     def transform(self, x):
         logging.debug(f"Dropping the following highly correlated numeric features: {self._columns_to_drop}")
-        return x.drop(columns=self._columns_to_drop, errors='ignore')
+        COLUMNS_TO_DROP_AT_END.extend(self._columns_to_drop)
+        return x

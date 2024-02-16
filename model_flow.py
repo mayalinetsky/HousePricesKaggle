@@ -14,12 +14,23 @@ from evaluation import rmse_log_scorer
 from custom_types import RawFold, ProcessedFold, X_y
 
 
-def prepare_submission_csv(ids: np.ndarray, sale_price_prediction: np.ndarray):
+def prepare_submission_csv(ids: np.ndarray,
+                           sale_price_prediction: np.ndarray,
+                           weighted_val_score: float,
+                           raw_data_pack: str,
+                           cross_val_pack: str,
+                           feat_ext_pack: str,
+                           feat_target_pack: str,
+                           preproc_pack: str,
+                           labeling_pack: str,
+                           model_pack: str):
     int_ids = ids.astype(int)
     submission_df = pd.DataFrame(data={"Id": int_ids, "SalePrice": sale_price_prediction})
 
     datetime_str = time.strftime('%Y-%m-%d--%H-%M-%S')
-    submission_df.to_csv(f"predictions_{datetime_str}.csv",
+    config_str = f"raw{raw_data_pack}_cv{cross_val_pack}_fe{feat_ext_pack}_ft{feat_target_pack}_pr{preproc_pack}_la{labeling_pack}_mo{model_pack}"
+
+    submission_df.to_csv(f"predictions_{weighted_val_score:.3f}_{config_str}_{datetime_str}.csv",
                          index=False)
 
 
