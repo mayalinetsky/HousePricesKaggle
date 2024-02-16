@@ -106,8 +106,6 @@ ax[1].set_xlabel('remodeling age when sold')
 ax[1].set_ylabel('price')
 # -
 
-train_origin_df['SalePrice'].mean()
-
 fig, ax = plt.subplots(1, 1)
 ax.scatter(train_for_play['OverallQual'], train_for_play['OverallCond'])
 
