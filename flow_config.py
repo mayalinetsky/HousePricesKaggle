@@ -20,7 +20,8 @@ from constants import *
 from evaluation import rmse_log_scorer, rmse_scorer
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
     CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age, \
-    binarize_year_remodeled
+    binarize_year_remodeled, join_bathrooms, binarize_pool, binarize_second_floor, binarize_garage, binarize_basement, \
+    binarize_fireplace
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target, produce_log_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess, drop_globally_gathered_columns
@@ -49,7 +50,13 @@ feature_extraction_packs = {
                                         group_exterior_covering,
                                         group_roofstyle_roofmatl,
                                         binarize_year_remodeled,
-                                        extract_asset_age]),
+                                        extract_asset_age,
+                                        join_bathrooms,
+                                        binarize_pool,
+                                        binarize_second_floor,
+                                        binarize_garage,
+                                        binarize_basement,
+                                        binarize_fireplace]),
                      RelativeFeatureExtractor()]}
 }
 
@@ -105,6 +112,29 @@ preprocessing_packs = {
            },
     "V2": {"steps": [NoFitPreProcessor([baseline_preprocess, drop_globally_gathered_columns]),
                      SimpleImputer(missing_values=pd.NA, strategy="mean").set_output(transform='pandas'),
+                     RobustScaler()
+                     ],
+           },
+    "V3": {"steps": [NoFitPreProcessor([preprocess,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="mean").set_output(transform='pandas'),
+                     RobustScaler()
+                     ],
+           },
+    "V4": {"steps": [NoFitPreProcessor([preprocess,
+                                        drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="mean").set_output(transform='pandas'),
+                     RobustScaler()
+                     ],
+           },
+    "V5": {"steps": [NoFitPreProcessor([preprocess,
+                                        drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(transform='pandas'),
                      RobustScaler()
                      ],
            }

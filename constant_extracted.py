@@ -25,3 +25,14 @@ RoofMatlGroup = 'RoofMatlGroup'
 AssetAge = 'AssetAge'
 
 Remodeled = 'Remodeled'
+
+TotalBathrooms = 'TotalBathrooms'
+
+Has2ndFloor = 'Has2ndFloor'
+
+HasGarage = 'HasGarage'
+
+HasBasement = 'HasBasement'
+
+HasFireplace = 'HasFireplace'
+

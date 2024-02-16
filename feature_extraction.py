@@ -75,6 +75,52 @@ def join_liv_bsmt_areas(x: pd.DataFrame):
     return x
 
 
+def binarize_pool(data: pd.DataFrame):
+    """
+    only 7 samples with pool, but might be important, so:
+    we create new *binary* feature 'HavePool' and drop 'PoolQC' 'PoolArea'
+    """
+    data.loc[data['PoolArea'] != 0, 'HavePool'] = 1
+    data.loc[data['PoolArea'] == 0, 'HavePool'] = 0
+    COLUMNS_TO_DROP_AT_END.extend(['PoolArea', 'PoolQC'])
+    return data
+
+
+def binarize_second_floor(data: pd.DataFrame):
+    data[Has2ndFloor] = data[SecondFlrSF].apply(lambda x: 1 if x > 0 else 0)
+    COLUMNS_TO_DROP_AT_END.extend([SecondFlrSF])
+    return data
+
+
+def binarize_garage(data: pd.DataFrame):
+    data[HasGarage] = data[GarageArea].apply(lambda x: 1 if x > 0 else 0)
+    COLUMNS_TO_DROP_AT_END.extend([GarageArea])
+    return data
+
+
+def binarize_basement(data: pd.DataFrame):
+    data[HasBasement] = data[TotalBsmtSF].apply(lambda x: 1 if x > 0 else 0)
+    COLUMNS_TO_DROP_AT_END.extend([TotalBsmtSF])
+    return data
+
+
+def binarize_fireplace(data: pd.DataFrame):
+    data[HasFireplace] = data[Fireplaces].apply(lambda x: 1 if x > 0 else 0)
+    COLUMNS_TO_DROP_AT_END.extend([Fireplaces])
+    return data
+
+
+def join_bathrooms(x: pd.DataFrame):
+    x[TotalBathrooms] = x[FullBath] + 0.5 * x[HalfBath] + x[BsmtFullBath] + 0.5 * x[BsmtHalfBath]
+
+    # columns that should probably be dropped:
+    columns_to_drop = [FullBath, HalfBath, BsmtFullBath, BsmtHalfBath]
+
+    COLUMNS_TO_DROP_AT_END.extend(columns_to_drop)
+
+    return x
+
+
 def group_exterior_covering(x: pd.DataFrame):
     """
     Exterior covering ('Exterior1st', 'Exterior2nd') has 2 features with 14 and 15 categories repectively
@@ -132,8 +178,8 @@ def binarize_year_remodeled(data: pd.DataFrame) -> pd.DataFrame:
     """
     Binarize the YearRemodAdd to True/False
     """
-    data[Remodeled] = (data[YearRemodAdd]-data[YearBuilt]).astype(bool).astype('category')
-    COLUMNS_TO_DROP_AT_END.extend([Remodeled])
+    data[Remodeled] = (data[YearRemodAdd] - data[YearBuilt]).astype(bool).astype('category')
+    COLUMNS_TO_DROP_AT_END.extend([YearRemodAdd])
     return data
 
 

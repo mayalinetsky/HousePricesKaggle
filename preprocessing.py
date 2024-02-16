@@ -29,7 +29,7 @@ def preprocess(data: pd.DataFrame):
 
     _convert_nan_to_str(data)
 
-    _convert_pool_features_to_binary(data)
+    _fill_na_LotFrontage_w_neib_median(data)
 
     return data
 
@@ -69,19 +69,13 @@ def _convert_nan_to_str(data: pd.DataFrame, inplace: bool = True):
     return data
 
 
-def _convert_pool_features_to_binary(data: pd.DataFrame):
-    """
-    only 7 samples with pool, but might be important, so:
-    we create new *binary* feature 'HavePool' and drop 'PoolQC' 'PoolArea'
-    """
-    data.loc[data['PoolArea'] != 0, 'HavePool'] = 1
-    data.loc[data['PoolArea'] == 0, 'HavePool'] = 0
-    COLUMNS_TO_DROP_AT_END.extend(['PoolArea', 'PoolQC'])
-    return data
-
-
 def _fill_na_GarageYrBlt_w_YearBuilt(data: pd.DataFrame, inplace: bool = True):
-    return data['GarageYrBlt'].fillna(data['YearBuilt'], inplace=inplace)
+    return data.loc[:, GarageYrBlt].fillna(data[YearBuilt], inplace=inplace)
+
+
+def _fill_na_LotFrontage_w_neib_median(data: pd.DataFrame):
+    data.loc[:, LotFrontage] = data.groupby(Neighborhood)[LotFrontage].transform(lambda x: x.fillna(x.median()))
+    return data
 
 
 def _drop_categorical_features_w_low_correlation_to_target(data: pd.DataFrame):
@@ -93,15 +87,18 @@ def _drop_categorical_features_w_low_correlation_to_target(data: pd.DataFrame):
                                BsmtFinType1, BsmtFinType2, Electrical,
                                Functional, Fence, MiscFeature
                                ]
-    return data.drop(columns=cat_cols_uncor_w_target, errors='ignore')
+    COLUMNS_TO_DROP_AT_END.extend(cat_cols_uncor_w_target)
+    return data
 
 
 def _drop_correlated_features(data: pd.DataFrame):
     # In the data, '1stFlrSF' + '2ndFlrSF' = 'GrLivArea'
     # We dropped '1stFlrSF' due to high correlation with 'GrLivArea'
-    return data.drop(columns=[FirststFlrSF], errors='ignore')
+    COLUMNS_TO_DROP_AT_END.extend([FirststFlrSF])
+    return data
 
 
 def _drop_imbalanced_features(data: pd.DataFrame):
     imbalanced = [Heating, Alley, Street, Utilities]
-    return data.drop(columns=imbalanced, errors='ignore')
+    COLUMNS_TO_DROP_AT_END.extend(imbalanced)
+    return data
