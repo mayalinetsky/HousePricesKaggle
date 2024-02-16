@@ -62,7 +62,7 @@ def process_fold(raw_fold: RawFold,
     return ProcessedFold(*processed_x_ys)
 
 
-def tune_hyper_params(processed_fold: ProcessedFold, model_pack: dict):
+def tune_hyper_params(processed_fold: ProcessedFold, model_pack: dict, scorer):
     train_val_combined_X = pd.concat([processed_fold.train_X_y[0], processed_fold.val_X_y[0]])
     train_val_combined_y = pd.concat([processed_fold.train_X_y[1], processed_fold.val_X_y[1]])
 
@@ -72,7 +72,7 @@ def tune_hyper_params(processed_fold: ProcessedFold, model_pack: dict):
     model = model_pack['class']()
     param_grid = model_pack['args']
 
-    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=train_val_indices, scoring=rmse_log_scorer)
+    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=train_val_indices, scoring=scorer)
     clf.fit(train_val_combined_X, train_val_combined_y)
 
     return clf

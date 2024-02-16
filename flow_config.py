@@ -16,6 +16,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, RobustScaler
 from sklearn.compose import ColumnTransformer
 from constants import *
+from evaluation import rmse_log_scorer, rmse_scorer
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
     CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age, \
     binarize_year_remodeled
@@ -106,8 +107,10 @@ preprocessing_packs = {
 
 labeling_packs = {
     "V0": {"function": produce_target,
+           "scorer": rmse_log_scorer,
            "inverse": lambda predictions: predictions},
     "V1": {"function": produce_log_target,
+           "scorer": rmse_scorer,
            "inverse": lambda predictions: np.expm1(predictions)}
 }
 

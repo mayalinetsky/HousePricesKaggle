@@ -64,7 +64,7 @@ if __name__ == "__main__":
     for fold_index, fold in enumerate(processed_folds, start=1):
         logging.info(f"\tDataset {fold_index}/{len(processed_folds)}")
 
-        clf = tune_hyper_params(fold, model_grid_search_config)
+        clf = tune_hyper_params(fold, model_grid_search_config, scorer=labeling_packs[LABELING_PACK]['scorer'])
 
         logging.info(f"\tFound best estimator. Best score: {clf.best_score_}, Best params: {clf.best_params_}")
 
