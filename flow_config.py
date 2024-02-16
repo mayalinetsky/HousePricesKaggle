@@ -11,8 +11,9 @@ Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1
 """
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, RobustScaler
 from sklearn.compose import ColumnTransformer
 from constants import *
@@ -86,7 +87,8 @@ UNCOMMON_CATEGORICAL_ORDINAL_ENCODER = OrdinalEncoder(categories=[['IR3', 'IR2',
 # from name to arguments for a pipeline
 preprocessing_packs = {
     "V0": {"steps": [NoFitPreProcessor([baseline_preprocess]),
-                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas')]},
+                     SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas'),
+                     RobustScaler()]},
     "V1": {"steps": [NoFitPreProcessor([preprocess]),
                      ColumnTransformer(transformers=[
                          ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
@@ -96,7 +98,6 @@ preprocessing_packs = {
                          remainder='passthrough'
                      ),
                      NoFitPreProcessor([drop_known_columns]),
-                     CorrelatedNumericFeaturesDropper(),
                      OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
                      SimpleImputer(missing_values=pd.NA, strategy='mean').set_output(transform='pandas'),
                      RobustScaler()
@@ -118,5 +119,23 @@ labeling_packs = {
 model_grid_search_params = {
     "LinearRegression": {"class": LinearRegression,
                          "args": {}  # insert here list of hyper-parameters
-                         }
+                         },
+    "Ridge": {"class": Ridge,
+              "args": {'alpha': np.logspace(-4, 1, 10),
+                       'solver': ['auto']}
+              },
+    "RandomForestRegressor": {"class": RandomForestRegressor,
+                              "args": {'n_jobs': [-1]}
+                              },
+    "GradientBoostingRegressor": {"class": GradientBoostingRegressor,
+                                  "args": {'n_estimators': [100, 1000, 3000],
+                                           'learning_rate': np.logspace(-4, 1, 10),
+                                           'max_depth': [4],
+                                           'max_features': ['sqrt'],
+                                           'min_samples_leaf': [15],
+                                           'loss': ['huber'],
+                                           'n_iter_no_change': [5],
+                                           'ccp_alpha': [0, 0.01, 0.1, 1, 10, 100],
+                                           'random_state': [42]}
+                                  }
 }
