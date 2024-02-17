@@ -25,10 +25,10 @@ if __name__ == "__main__":
     GET_RAW_DATA_PACK = "V1"
     FEATURE_EXTRACTION_PACK = "V1"
     FEAT_TARGET_SEPARATION_PACK = "V0"
-    PREPROCESSING_PACK = "V8"
+    PREPROCESSING_PACK = "V7"
     LABELING_PACK = "V1"
     CROSS_VALIDATION_PACK = "KFold"
-    MODEL_PACK = 'GradientBoostingRegressor'
+    MODEL_PACK = 'RandomForestRegressor'
 
     # get raw data
     logging.info(f"Loading data...")

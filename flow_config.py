@@ -196,6 +196,27 @@ preprocessing_packs = {
                          transform='pandas'),
                      RobustScaler()
                      ],
+           },
+    "V9": {"steps": [NoFitPreProcessor([preprocess]),
+                     ColumnTransformer(transformers=[
+                         ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
+                         ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
+                         ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
+                         ('one_hot',
+                          OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning, MiscFeature, Condition1,
+                           HouseStyle])
+                     ],
+                         remainder='passthrough',
+                         verbose_feature_names_out=False,
+                     ),
+                     NoFitPreProcessor([drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(
+                         transform='pandas'),
+                     RobustScaler()
+                     ],
            }
 
 }
