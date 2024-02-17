@@ -55,7 +55,6 @@ feature_extraction_packs = {
                                         binarize_garage,
                                         binarize_basement,
                                         binarize_fireplace,
-                                        extract_LotAreaRemainder,
                                         extract_garage_age]),
                      RelativeFeatureExtractor()]}
 }
