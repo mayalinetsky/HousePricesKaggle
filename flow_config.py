@@ -14,6 +14,7 @@ import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, RobustScaler
 from sklearn.compose import ColumnTransformer
 from constants import *
@@ -35,11 +36,13 @@ get_raw_data_packs = {
 }
 
 cross_validation_packs = {
-    "TrainTrainTest": {"class": BaseTrainValTestSplitter,
-                       "args": {}
-                       },
-    "AllUntilMonthSplitter": {"class": AllUntilMonthSplitter,
-                              "args": {}}
+    "KFold": {"class": KFold,
+              "args": {"n_splits": 10, "shuffle": True, "random_state": 42}
+              }
+    # "AllUntilMonthSplitter": {"class": AllUntilMonthSplitter,
+    #                           "args": {}},
+    # "TrainNoneTestSplitter": {"class": TrainNoneTestSplitter,
+    #                           "args": {}}
 }
 
 # from name to arguments for a pipeline

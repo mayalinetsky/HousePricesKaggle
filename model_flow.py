@@ -6,7 +6,7 @@ See the main_flow.png for a diagram.
 import time
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, KFold
 
 from sklearn.pipeline import make_pipeline
 
@@ -75,12 +75,15 @@ def process_fold(raw_fold: RawFold,
 
 def tune_hyper_params(train_val_combined_X: pd.DataFrame,
                       train_val_combined_y: pd.Series,
-                      cv_indices: list[tuple[np.ndarray, np.ndarray]], model_pack: dict, scorer):
+                      cv_splitter, model_pack: dict, scorer):
 
     model = model_pack['class']()
     param_grid = model_pack['args']
 
-    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_indices, scoring=scorer)
+    clf = GridSearchCV(estimator=model,
+                       param_grid=param_grid,
+                       cv=cv_splitter,
+                       scoring=scorer)
     clf.fit(train_val_combined_X, train_val_combined_y)
 
     return clf
