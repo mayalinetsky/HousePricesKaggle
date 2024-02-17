@@ -67,10 +67,18 @@ def join_liv_bsmt_areas(x: pd.DataFrame):
     """
     x[TotalArea] = x[GrLivArea] + x[TotalBsmtSF]
 
-    # columns that should probably be dropped:
-    columns_to_drop = [TotalBsmtSF, GrLivArea, BsmtFinSF2, SecondFlrSF]
+    # columns_to_drop = [TotalBsmtSF, FirststFlrSF, BsmtFinSF2, SecondFlrSF]
+    #
+    # COLUMNS_TO_DROP_AT_END.extend(columns_to_drop)
 
-    COLUMNS_TO_DROP_AT_END.extend(columns_to_drop)
+    return x
+
+
+def extract_LotAreaRemainder(x: pd.DataFrame):
+    x[LotAreaRemainder] = x[LotArea] - x[FirststFlrSF] - x[GarageArea] - x[TotOpenPorchSF] - x[TotClosePorchSF]\
+                          - x[MasVnrArea] - x[WoodDeckSF] - x[PoolArea]
+
+    COLUMNS_TO_DROP_AT_END.extend([LotArea])
 
     return x
 
@@ -171,6 +179,16 @@ def extract_asset_age(data: pd.DataFrame):
     data[AssetAge] = data[YrSold] - data[YearBuilt]
 
     COLUMNS_TO_DROP_AT_END.extend([YearBuilt])
+    return data
+
+
+def extract_garage_age(data: pd.DataFrame):
+    """
+    Calculate the asset age: YrSold - YearBuilt
+    """
+    data[GarageAge] = data[YrSold] - data[GarageYrBlt]
+
+    COLUMNS_TO_DROP_AT_END.extend([GarageYrBlt])
     return data
 
 

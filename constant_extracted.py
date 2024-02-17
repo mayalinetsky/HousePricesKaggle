@@ -4,6 +4,8 @@ Column names of extracted features
 
 TotalArea = "TotalArea"
 
+LotAreaRemainder = "LotAreaRemainder"
+
 TotClosePorchSF = "TotClosePorchSF"
 
 TotOpenPorchSF = "TotOpenPorchSF"
@@ -23,6 +25,8 @@ RoofStyleGroup = 'RoofStyleGroup'
 RoofMatlGroup = 'RoofMatlGroup'
 
 AssetAge = 'AssetAge'
+
+GarageAge = 'GarageAge'
 
 Remodeled = 'Remodeled'
 

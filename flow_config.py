@@ -22,7 +22,7 @@ from evaluation import rmse_log_scorer, rmse_scorer
 from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatureExtractor, join_liv_bsmt_areas, \
     CorrelatedNumericFeaturesDropper, group_exterior_covering, group_roofstyle_roofmatl, extract_asset_age, \
     binarize_year_remodeled, join_bathrooms, binarize_pool, binarize_second_floor, binarize_garage, binarize_basement, \
-    binarize_fireplace
+    binarize_fireplace, extract_LotAreaRemainder, extract_garage_age
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target, produce_log_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess, drop_globally_gathered_columns
@@ -54,7 +54,9 @@ feature_extraction_packs = {
                                         binarize_second_floor,
                                         binarize_garage,
                                         binarize_basement,
-                                        binarize_fireplace]),
+                                        binarize_fireplace,
+                                        extract_LotAreaRemainder,
+                                        extract_garage_age]),
                      RelativeFeatureExtractor()]}
 }
 
@@ -182,7 +184,9 @@ preprocessing_packs = {
                          ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
                          ('one_hot1',
                           OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
-                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning])
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning]),
+                         ('misc_feat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                          [MiscFeature])
                      ],
                          remainder='passthrough',
                          verbose_feature_names_out=False,

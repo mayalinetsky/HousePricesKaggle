@@ -5,6 +5,8 @@ import logging
 import warnings
 
 import pandas as pd
+
+from constant_extracted import TotalArea
 from constants import *
 
 COLUMNS_TO_DROP_AT_END = []
@@ -51,6 +53,8 @@ def drop_known_columns(data: pd.DataFrame):
     data = _drop_imbalanced_features(data)
 
     data = _drop_correlated_features(data)
+
+    COLUMNS_TO_DROP_AT_END.extend([MiscVal])  # This is assuming the column MiscFeature was converted to one hot
     return data
 
 
@@ -102,16 +106,22 @@ def _drop_categorical_features_w_low_correlation_to_target(data: pd.DataFrame):
     cat_cols_uncor_w_target = [LotShape, LandContour, LotConfig,
                                LandSlope, Condition2, RoofMatl, BsmtExposure,
                                BsmtFinType1, BsmtFinType2, Electrical,
-                               Functional, Fence, MiscFeature
-                               ]
+                               Functional, Fence]
     COLUMNS_TO_DROP_AT_END.extend(cat_cols_uncor_w_target)
     return data
 
 
 def _drop_correlated_features(data: pd.DataFrame):
     # In the data, '1stFlrSF' + '2ndFlrSF' = 'GrLivArea'
-    # We dropped '1stFlrSF' due to high correlation with 'GrLivArea'
-    COLUMNS_TO_DROP_AT_END.extend([FirststFlrSF])
+    if all([t in data.columns for t in [GrLivArea, FirststFlrSF, SecondFlrSF]]):
+        COLUMNS_TO_DROP_AT_END.extend([GrLivArea])
+
+    if TotalBsmtSF in data.columns and all([t not in COLUMNS_TO_DROP_AT_END for t in [BsmtFinSF1, BsmtFinSF2]]):
+        COLUMNS_TO_DROP_AT_END.extend([BsmtFinSF1, BsmtFinSF2])
+
+    if all([t in data.columns for t in [TotalArea, GrLivArea, TotalBsmtSF]]):
+        COLUMNS_TO_DROP_AT_END.extend([TotalArea])
+
     return data
 
 
