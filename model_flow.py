@@ -19,7 +19,7 @@ def prepare_submission_csv(ids: np.ndarray, sale_price_prediction: np.ndarray, t
     submission_df = pd.DataFrame(data={"Id": int_ids, "SalePrice": sale_price_prediction})
 
     datetime_str = time.strftime('%Y-%m-%d--%H-%M-%S')
-    submission_df.to_csv(f"{title}_predictions_{datetime_str}.csv",
+    submission_df.to_csv(f"results/{title}_predictions_{datetime_str}.csv",
                          index=False)
 
 
