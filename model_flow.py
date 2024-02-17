@@ -73,17 +73,52 @@ def process_fold(raw_fold: RawFold,
     return ProcessedFold(*processed_x_ys)
 
 
-def tune_hyper_params(processed_fold: ProcessedFold, model_pack: dict, scorer):
-    train_val_combined_X = pd.concat([processed_fold.train_X_y[0], processed_fold.val_X_y[0]])
-    train_val_combined_y = pd.concat([processed_fold.train_X_y[1], processed_fold.val_X_y[1]])
-
-    train_val_indices = [(np.arange(len(processed_fold.train_X_y[0])),
-                          np.arange(len(processed_fold.train_X_y[0]), len(train_val_combined_X)))]
+def tune_hyper_params(train_val_combined_X: pd.DataFrame,
+                      train_val_combined_y: pd.Series,
+                      cv_indices: list[tuple[np.ndarray, np.ndarray]], model_pack: dict, scorer):
 
     model = model_pack['class']()
     param_grid = model_pack['args']
 
-    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=train_val_indices, scoring=scorer)
+    clf = GridSearchCV(estimator=model, param_grid=param_grid, cv=cv_indices, scoring=scorer)
     clf.fit(train_val_combined_X, train_val_combined_y)
 
     return clf
+
+
+def concat_folds_for_cv(processed_folds: list[ProcessedFold]):
+    """
+    Return a dataframe that is a concatenation of all folds' train and validation sets,
+    and an iterator that yields (train indices, val indices) tuples for each folds (this is used in gridsearch)
+    """
+    train_val_combined_X = pd.DataFrame()
+    train_val_combined_y = pd.Series()
+    train_val_indices = []
+    test_combined_X = pd.DataFrame()
+
+    for index, processed_fold in enumerate(processed_folds, start=1):
+        train_X, train_y = processed_fold.train_X_y
+        val_X, val_y = processed_fold.val_X_y
+        test_X, _ = processed_fold.test_X_y
+
+        index_shift = len(train_val_combined_X)
+        train_indices = np.arange(index_shift, index_shift+len(train_X))
+        val_indices = np.arange(index_shift+len(train_X), index_shift+len(train_X)+len(val_X))
+
+        train_val_indices.append((train_indices, val_indices))
+
+        train_val_combined_X = pd.concat([train_val_combined_X,
+                                          train_X,
+                                          val_X])
+
+        train_val_combined_y = pd.concat([train_val_combined_y,
+                                          train_y,
+                                          val_y])
+
+        test_combined_X = pd.concat([test_combined_X, test_X], ignore_index=False)
+
+    # because each fold can have different features,
+    # when concatenating all folds we can get nan values in features that are not present in all folds
+    train_val_combined_X.fillna(0, inplace=True)
+    test_combined_X.fillna(0, inplace=True)
+    return train_val_combined_X, train_val_combined_y, train_val_indices, test_combined_X

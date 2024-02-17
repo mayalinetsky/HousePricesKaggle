@@ -13,7 +13,7 @@ from flow_config import (get_raw_data_packs,
                          labeling_packs,
                          cross_validation_packs,
                          model_grid_search_params)
-from model_flow import prepare_submission_csv, process_fold, tune_hyper_params
+from model_flow import prepare_submission_csv, process_fold, tune_hyper_params, concat_folds_for_cv
 
 if __name__ == "__main__":
     """
@@ -52,45 +52,35 @@ if __name__ == "__main__":
                                       labeling_pack=labeling_packs[LABELING_PACK])
         processed_folds.append(processed_fold)
 
-    logging.info(f"All datasets ready.")
+    logging.info(f"All folds ready.")
     model_grid_search_config = model_grid_search_params[MODEL_PACK]
 
-    test_predictions_per_fold: list[pd.Series] = []
-
-    weighted_score_all_folds = 0
-    total_fold_weight = 0
+    logging.info(f"Combining folds into a single input for GridSearchCV")
+    train_val_combined_X, train_val_combined_y, train_val_indices, test_combined_X = concat_folds_for_cv(processed_folds)
 
     # hyper-param tuning on Prepped Folds
-    logging.info(f"Tuning hyperparameters for each dataset...")
-    for fold_index, fold in enumerate(processed_folds, start=1):
-        logging.info(f"\tDataset {fold_index}/{len(processed_folds)}")
+    logging.info(f"Tuning hyperparameters to optimize average score over all folds...")
 
-        clf = tune_hyper_params(fold, model_grid_search_config, scorer=labeling_packs[LABELING_PACK]['scorer'])
+    clf = tune_hyper_params(train_val_combined_X,
+                            train_val_combined_y,
+                            train_val_indices,
+                            model_grid_search_config, scorer=labeling_packs[LABELING_PACK]['scorer'])
 
-        logging.info(f"\tFound best estimator. Best score: {clf.best_score_}, Best params: {clf.best_params_}")
+    logging.info(f"Found best estimator. Best cv score: {clf.best_score_}, Best params: {clf.best_params_}")
 
-        fold_weight = len(fold.test_X_y[1])
-        total_fold_weight += fold_weight
-        weighted_score_all_folds += fold_weight * clf.best_score_
+    best_model = clf.best_estimator_
 
-        best_model = clf.best_estimator_
+    logging.info(f"\nPredicting on test set...")
+    test_predictions_ = best_model.predict(test_combined_X)
 
-        test_predictions_ = best_model.predict(fold.test_X_y[0])
+    test_predictions = labeling_packs[LABELING_PACK]['inverse'](test_predictions_)
 
-        test_predictions = labeling_packs[LABELING_PACK]['inverse'](test_predictions_)
-
-        test_predictions_series = pd.Series(test_predictions, index=fold.test_X_y[0].index)
-
-        test_predictions_per_fold.append(test_predictions_series)
-
-    weighted_score_all_folds = weighted_score_all_folds/total_fold_weight
-    logging.info(f"Done tuning hyper-params.\nWeighted score on all folds: {weighted_score_all_folds}")
+    test_predictions_series = pd.Series(test_predictions, index=test_combined_X.index)
 
     logging.info(f"Preparing final predictions...")
-    final_test_predictions = pd.concat(test_predictions_per_fold)
-    prepare_submission_csv(final_test_predictions.index,
-                           final_test_predictions.values,
-                           weighted_score_all_folds,
+    prepare_submission_csv(test_predictions_series.index,
+                           test_predictions_series.values,
+                           clf.best_score_,
                            GET_RAW_DATA_PACK,
                            CROSS_VALIDATION_PACK,
                            FEATURE_EXTRACTION_PACK,
