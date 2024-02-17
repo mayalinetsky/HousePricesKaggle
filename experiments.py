@@ -94,7 +94,7 @@ remodeled_same_as_built = train_for_play.loc[train_for_play['YearRemodAdd'] == t
 remodeled_not_same_as_built = train_for_play.loc[train_for_play['YearRemodAdd'] != train_for_play['YearBuilt']]
 
 # +
-fig, ax = plt.subplots(1, 2, figsize=(16,5))
+fig, ax = plt.subplots(1,   2, figsize=(16,5))
 ax[0].scatter(remodeled_same_as_built['remodeling_age_when_sold'], remodeled_same_as_built['SalePrice'])
 ax[0].set_title('remodeling year same as built')
 ax[0].set_xlabel('remodeling age when sold')
@@ -109,11 +109,16 @@ ax[1].set_ylabel('price')
 fig, ax = plt.subplots(1, 1)
 ax.scatter(train_for_play['OverallQual'], train_for_play['OverallCond'])
 
-with open('ov_cond_neighb.txt', 'w') as f:
-    f.write(train_origin.groupby('Neighborhood')['OverallCond'].value_counts().to_string())
+train_origin.groupby('Neighborhood')['OverallCond'].value_counts()
+
+# +
+num_of_neighborhoods = len(train_origin['Neighborhood'].unique())
+
+num_of_neighborhoods
+# -
+
+fig, ax = plt.subplots(5, 5, figsize = (16, 8))
+for i in range(num_of_neighborhoods):
+    ax.barh(train_origin[neighborhoods[i]], train_origin.loc[train_origin['Neighborhood'] == neiborhood[i]]['OverallCond'])
 
 
-
-
-
-#%%
