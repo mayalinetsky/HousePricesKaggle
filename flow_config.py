@@ -183,7 +183,8 @@ preprocessing_packs = {
                          ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
                          ('one_hot',
                           OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
-                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning, MiscFeature, Condition1])
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning, MiscFeature, Condition1,
+                           HouseStyle])
                      ],
                          remainder='passthrough',
                          verbose_feature_names_out=False,
