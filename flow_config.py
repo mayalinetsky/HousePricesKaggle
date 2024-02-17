@@ -26,9 +26,8 @@ from feature_extraction import FeatureExtractor, join_porch_areas, RelativeFeatu
 from feature_target_separation import separate_features_and_target
 from labeling import produce_target, produce_log_target
 from preprocessing import baseline_preprocess, drop_known_columns, preprocess, drop_globally_gathered_columns
-from preprocessors import NoFitPreProcessor
+from preprocessors import NoFitPreProcessor, SkewedFeaturesNormalizer
 from raw_data import get_raw_data
-from raw_data_folding import BaseTrainValTestSplitter, AllUntilMonthSplitter
 
 get_raw_data_packs = {
     "V0": {"function": get_raw_data},
@@ -39,10 +38,6 @@ cross_validation_packs = {
     "KFold": {"class": KFold,
               "args": {"n_splits": 10, "shuffle": True, "random_state": 42}
               }
-    # "AllUntilMonthSplitter": {"class": AllUntilMonthSplitter,
-    #                           "args": {}},
-    # "TrainNoneTestSplitter": {"class": TrainNoneTestSplitter,
-    #                           "args": {}}
 }
 
 # from name to arguments for a pipeline
@@ -178,6 +173,27 @@ preprocessing_packs = {
                          transform='pandas'),
                      RobustScaler()
                      ],
+           },
+    "V8": {"steps": [NoFitPreProcessor([preprocess]),
+                     SkewedFeaturesNormalizer(),
+                     ColumnTransformer(transformers=[
+                         ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
+                         ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
+                         ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
+                         ('one_hot1',
+                          OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning])
+                     ],
+                         remainder='passthrough',
+                         verbose_feature_names_out=False,
+                     ),
+                     NoFitPreProcessor([drop_known_columns,
+                                        drop_globally_gathered_columns,
+                                        lambda d: d.select_dtypes(include='number')]),
+                     SimpleImputer(missing_values=pd.NA, strategy="constant", fill_value=0).set_output(
+                         transform='pandas'),
+                     RobustScaler()
+                     ],
            }
 
 }
@@ -225,14 +241,12 @@ model_grid_search_params = {
                                             }
                                    },
     "GradientBoostingRegressor": {"class": GradientBoostingRegressor,
-                                  "args": {'n_estimators': [100, 1000, 3000],
-                                           'learning_rate': np.logspace(-4, 1, 10),
+                                  "args": {'n_estimators': [3000],
+                                           'learning_rate': [0.05],
                                            'max_depth': [4],
                                            'max_features': ['sqrt'],
                                            'min_samples_leaf': [15],
                                            'loss': ['huber'],
-                                           'n_iter_no_change': [5],
-                                           'ccp_alpha': [0, 0.01, 0.1, 1, 10, 100],
                                            'random_state': [42]}
                                   }
 }
