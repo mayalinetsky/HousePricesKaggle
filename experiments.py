@@ -109,4 +109,11 @@ ax[1].set_ylabel('price')
 fig, ax = plt.subplots(1, 1)
 ax.scatter(train_for_play['OverallQual'], train_for_play['OverallCond'])
 
+with open('ov_cond_neighb.txt', 'w') as f:
+    f.write(train_origin.groupby('Neighborhood')['OverallCond'].value_counts().to_string())
 
+
+
+
+
+#%%
