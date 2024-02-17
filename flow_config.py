@@ -11,7 +11,13 @@ Meaning you cannot add "V1" only to preprocessing_packs, without also adding 'V1
 """
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import (LinearRegression,RidgeClassifier, Perceptron,
+                                  LogisticRegression, PassiveAggressiveClassifier, SGDClassifier)
+from sklearn.svm import LinearSVC, SVC
+from sklearn.naive_bayes import MultinomialNB, GaussianNB
+from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from constants import *
@@ -110,5 +116,35 @@ labeling_packs = {
 model_grid_search_params = {
     "LinearRegression": {"class": LinearRegression,
                          "args": {}  # insert here list of hyper-parameters
-                         }
-}
+                         },
+    "RidgeClassifier": {"class": RidgeClassifier,
+                             "args": {}  # insert here list of hyper-parameters
+                       },
+    "LogisticRegression": {"class":  LogisticRegression,
+                  "args": {}  # insert here list of hyper-parameters
+                          },
+    "SGDClassifier": {"class":  SGDClassifier,
+                  "args": {}  # insert here list of hyper-parameters
+                     },
+    "GaussianNB": {"class":  GaussianNB,
+                  "args": {}  # insert here list of hyper-parameters
+                  },
+    "MultinomialNB": {"class":  MultinomialNB,
+                  "args": {}  # insert here list of hyper-parameters
+                     },
+    "KNeighborsClassifier": {"class":  KNeighborsClassifier,
+                  "args": {}  # insert here list of hyper-parameters
+                            },
+    "NearestCentroid": {"class":  NearestCentroid,
+                  "args": {}  # insert here list of hyper-parameters
+                       },
+    "RandomForestClassifier": {"class":  RandomForestClassifier,
+                  "args": {}  # insert here list of hyper-parameters
+                              },
+    "LinearSVC": {"class":  LinearSVC,
+                  "args": {}  # insert here list of hyper-parameters
+                 },
+    "SVC": {"class": SVC,
+                  "args": {}  # insert here list of hyper-parameters
+                  }
+    }

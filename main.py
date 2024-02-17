@@ -32,7 +32,6 @@ if __name__ == "__main__":
     raw_folds = cv_splitter.split(train_raw_data, test_raw_data)
 
     # extract features from raw data, separate target, preprocess
-
     logging.info(f"Preparing datasets...")
     processed_folds = []
     for fold_index, raw_fold in enumerate(raw_folds, start=1):
@@ -45,28 +44,36 @@ if __name__ == "__main__":
         processed_folds.append(processed_fold)
 
     logging.info(f"All datasets ready.")
-    model_grid_search_config = model_grid_search_params['LinearRegression']
+    names = ['LinearRegression', 'RidgeClassifier', 'LogisticRegression', 'SGDClassifier', 'GaussianNB',
+             'MultinomialNB', 'KNeighborsClassifier', 'NearestCentroid', 'RandomForestClassifier', 'LinearSVC', 'SVC']
+    average_results = list()
 
-    test_predictions_per_fold: list[pd.Series] = []
+    for name_index, name in enumerate(names):
+        model_grid_search_config = model_grid_search_params[name]
 
-    # hyper-param tuning on Prepped Folds
-    logging.info(f"Tuning hyperparameters for each dataset...")
-    for fold_index, fold in enumerate(processed_folds, start=1):
-        logging.info(f"\tDataset {fold_index}/{len(processed_folds)}")
+        test_pred_per_fold: list[pd.Series] = []
 
-        clf = tune_hyper_params(fold, model_grid_search_config)
+        # hyper-param tuning on Prepped Folds
+        logging.info(f"{name_index}. {name}:Tuning hyperparameters for each dataset...")
+        model_average_score = 0
 
-        logging.info(f"\tFound best estimator. Best score: {clf.best_score_}")
-        best_model = clf.best_estimator_
+        for fold_index, fold in enumerate(processed_folds, start=1):
+            logging.info(f"\tDataset {fold_index}/{len(processed_folds)}")
 
-        test_predictions = best_model.predict(fold.test_X_y[0])
+            clf = tune_hyper_params(fold, model_grid_search_config)
 
-        test_predictions_series = pd.Series(test_predictions, index=fold.test_X_y[0].index)
+            logging.info(f"\tFound best estimator for {name}. Best score: {clf.best_score_}")
+            best_model = clf.best_estimator_
 
-        test_predictions_per_fold.append(test_predictions_series)
+            test_pred = best_model.predict(fold.test_X_y[0])
 
-    logging.info(f"Done tuning hyper-params. Preparing final predictions...")
-    final_test_predictions = pd.concat(test_predictions_per_fold)
-    prepare_submission_csv(final_test_predictions.index, final_test_predictions.values)
+            test_pred_series = pd.Series(test_pred, index=fold.test_X_y[0].index)
 
-    logging.info(f"Done.")
+            test_pred_per_fold.append(test_pred_series)
+
+            logging.info(f"Done tuning hyper-params. Preparing final predictions...")
+            final_test_pred = pd.concat(test_pred_per_fold)
+
+        prepare_submission_csv(final_test_pred.index, final_test_pred.values)
+
+        logging.info(f"Done.")
