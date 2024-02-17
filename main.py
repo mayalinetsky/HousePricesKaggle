@@ -46,21 +46,22 @@ if __name__ == "__main__":
     logging.info(f"All datasets ready.")
     names = ['LinearRegression', 'RidgeClassifier', 'LogisticRegression', 'SGDClassifier', 'GaussianNB',
              'MultinomialNB', 'KNeighborsClassifier', 'NearestCentroid', 'RandomForestClassifier', 'LinearSVC', 'SVC']
-    average_results = list()
+    average_results = dict()
 
     for name_index, name in enumerate(names):
+        logging.info(f'Starting {name}')
         model_grid_search_config = model_grid_search_params[name]
 
         test_pred_per_fold: list[pd.Series] = []
 
         # hyper-param tuning on Prepped Folds
         logging.info(f"{name_index}. {name}:Tuning hyperparameters for each dataset...")
-        model_average_score = 0
 
         for fold_index, fold in enumerate(processed_folds, start=1):
             logging.info(f"\tDataset {fold_index}/{len(processed_folds)}")
 
             clf = tune_hyper_params(fold, model_grid_search_config)
+            average_results[name] = clf.best_score_
 
             logging.info(f"\tFound best estimator for {name}. Best score: {clf.best_score_}")
             best_model = clf.best_estimator_
@@ -74,6 +75,7 @@ if __name__ == "__main__":
             logging.info(f"Done tuning hyper-params. Preparing final predictions...")
             final_test_pred = pd.concat(test_pred_per_fold)
 
-        prepare_submission_csv(final_test_pred.index, final_test_pred.values)
+        prepare_submission_csv(final_test_pred.index, final_test_pred.values, title=name)
 
-        logging.info(f"Done.")
+        logging.info(f"Done {name}.")
+    logging.info(f"Done")
