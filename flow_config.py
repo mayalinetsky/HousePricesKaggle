@@ -181,11 +181,9 @@ preprocessing_packs = {
                          ('common_cat', COMMON_CATEGORICAL_ORDINAL_ENCODER1, COMMON_CATEGORICAL_FEATURES1),
                          ('common_cat2', COMMON_CATEGORICAL_ORDINAL_ENCODER2, COMMON_CATEGORICAL_FEATURES2),
                          ('uncommon_cat', UNCOMMON_CATEGORICAL_ORDINAL_ENCODER, UNCOMMON_CATEGORICAL_FEATURES),
-                         ('one_hot1',
+                         ('one_hot',
                           OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
-                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning]),
-                         ('misc_feat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False),
-                          [MiscFeature])
+                          [Neighborhood, SaleType, MoSold, YrSold, MSSubClass, MSZoning, MiscFeature, Condition1])
                      ],
                          remainder='passthrough',
                          verbose_feature_names_out=False,
